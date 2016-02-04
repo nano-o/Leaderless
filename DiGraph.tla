@@ -6,7 +6,7 @@
 (* declarative counterpart (e.g.  CHOOSE x \in X : P(x)).                  *)
 (***************************************************************************)
 
-EXTENDS FiniteSets, Sequences, Naturals, TLC
+EXTENDS FiniteSets, Sequences, Naturals, Common
 
 
 Image(f) == {f[x] : x \in DOMAIN f}
@@ -119,7 +119,9 @@ Cycles2(G) ==
 CompleteSubGraphs(G) == 
     {W \in SUBSET Vertices(G) :
         /\  Cardinality(W) > 1 
-        /\  \A v1,v2 \in W : v1 = v2 \/ (<<v1,v2>> \in Edges(G) /\ <<v2,v1>> \in Edges(G))}
+        /\  \A v1,v2 \in W : 
+                \/  v1 = v2 
+                \/ (<<v1,v2>> \in Edges(G) /\ <<v2,v1>> \in Edges(G))}
 
 IsMaximal(X, Xs) == \A Y \in Xs : X = Y \/ ~(X \subseteq Y)
 
@@ -128,24 +130,26 @@ Cliques(G) ==
 
 \* SC subgraphs as set of vertices
 StronglyConnectedSubgraphs(G) ==
-    {W \in SUBSET Vertices(G) : W # {} /\ \A v1,v2 \in W : v1 = v2 \/ Dominates(v1,v2,G)}
+    {W \in SUBSET Vertices(G) : W # {} /\ \A v1,v2 \in W : 
+        v1 = v2 \/ Dominates(v1,v2,G)}
 
 (***************************************************************************)
 (* The strongly connected components of G.                                 *)
 (***************************************************************************)
-SCCs(G) ==
-    {W \in StronglyConnectedSubgraphs(G) : IsMaximal(W, StronglyConnectedSubgraphs(G))}
+SCCs(G) == {W \in StronglyConnectedSubgraphs(G) : 
+    IsMaximal(W, StronglyConnectedSubgraphs(G))}
 
 (***************************************************************************)
 (* The graph formed by the strongly connected components of G and their    *)
 (* topological ordering.                                                   *)
 (***************************************************************************)
-SCCGraph(G) == <<
-    SCCs(G),
-    {<<sc1, sc2>> \in SCCs(G) \times SCCs(G) :
-        /\  \E v1 \in sc1, v2 \in sc2 :
-                <<v1,v2>> \in Edges(G)
-        /\  sc1 # sc2 }>>
+SCCGraph(G) == 
+    LET edges == 
+        {<<sc1, sc2>> \in SCCs(G) \times SCCs(G) :
+            /\  \E v1 \in sc1, v2 \in sc2 :
+                    <<v1,v2>> \in Edges(G)
+            /\  sc1 # sc2}
+    IN <<SCCs(G), edges>>
         
 
 (***************************************************************************)
@@ -154,8 +158,8 @@ SCCGraph(G) == <<
 (* sequence.                                                               *)
 (***************************************************************************)
 Linearization(G) ==
-    CHOOSE s \in Seq(Vertices(G)) :
-        /\  NoDup(s) 
+    CHOOSE s \in BSeq(Vertices(G), Cardinality(Vertices(G))) :
+        /\ NoDup(s) 
         /\ \A v \in Vertices(G) : \E i \in DOMAIN s : s[i] = v
         /\ \A i,j \in DOMAIN s : <<s[i],s[j]>> \in TopologicalOrder(G) => j < i
    
@@ -174,15 +178,9 @@ EPaxosLinRec(s, sccs) ==
 EPaxosLinearization(G) ==
     LET SCCLin == Linearization(SCCGraph(G))
     IN  EPaxosLinRec(<<>>, SCCLin)
- 
 
-(***************************************************************************)
-(* For TLC                                                                 *)
-(***************************************************************************)
-CONSTANT V, MaxSeq \* A set for containing model values (for TLC).
-BSeq(X) == {<<>>} \cup UNION {[1..n -> X] : n \in 1..MaxSeq}
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Feb 04 16:09:43 EST 2016 by nano
+\* Last modified Thu Feb 04 17:02:42 EST 2016 by nano
 \* Created Tue Jul 28 03:10:02 CEST 2015 by nano

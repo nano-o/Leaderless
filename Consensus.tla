@@ -1,29 +1,30 @@
 ----------------------------- MODULE Consensus -----------------------------
 
-CONSTANT V
+EXTENDS Common
 
-VARIABLES proposed, decided
+VARIABLES state
 
-None == CHOOSE x : x \notin V
+Interface == INSTANCE ConsensusInterface
 
-Init == proposed = {} /\ decided = None
+Init == Interface!Init(state)
 
-Propose(v) ==
-    /\  proposed' = proposed \cup {v}
-    /\  UNCHANGED decided
+Decide(v) == 
+    /\  state.decided = None
+    /\  \E s \in Interface!State : 
+            /\  Interface!Decide(v, state, s)
+            /\  state' = s
 
-Decide == 
-    /\  decided = None
-    /\  \E v \in proposed : decided' = v
-    /\  UNCHANGED proposed
+Propose(v) == \E s \in Interface!State : 
+        /\  Interface!Propose(v, state, s)
+        /\  state' = s
 
-Next == Decide \/ \E v \in V : Propose(v)
+Next == \E v \in V : Decide(v) \/ Propose(v)
 
-Spec == Init /\ [][Next]_<<proposed, decided>>
+Spec == Init /\ [][Next]_<<state>>
 
-THEOREM Spec => [](\A v \in V : decided = v => [](decided = v))
+THEOREM Spec => [](\A v \in V : state.decided = v => [](state.decided = v))
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Feb 04 16:44:51 EST 2016 by nano
+\* Last modified Thu Feb 04 17:54:29 EST 2016 by nano
 \* Created Thu Feb 04 16:14:26 EST 2016 by nano
