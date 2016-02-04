@@ -179,8 +179,22 @@ EPaxosLinearization(G) ==
     LET SCCLin == Linearization(SCCGraph(G))
     IN  EPaxosLinRec(<<>>, SCCLin)
 
+(***************************************************************************)
+(* Converts a graph in the form                                            *)
+(*                                                                         *)
+(*     [V -> SUBSET V]                                                     *)
+(*                                                                         *)
+(* to the form                                                             *)
+(*                                                                         *)
+(*     SUBSET V \times SUBSET (V \times V)                                 *)
+(***************************************************************************)
+ConvertGraph(G) ==
+    LET Vs == DOMAIN G
+        Es == UNION { {<<v1,v2>> : v2 \in G[v1]} : v1 \in DOMAIN G}
+    IN <<Vs, Es>>
+
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Feb 04 17:02:42 EST 2016 by nano
+\* Last modified Thu Feb 04 18:52:36 EST 2016 by nano
 \* Created Tue Jul 28 03:10:02 CEST 2015 by nano
