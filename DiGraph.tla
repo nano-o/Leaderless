@@ -157,13 +157,34 @@ Linearization(G) ==
     CHOOSE s \in Seq(Vertices(G)) :
         /\  NoDup(s) 
         /\ \A v \in Vertices(G) : \E i \in DOMAIN s : s[i] = v
-        /\ \A i,j \in DOMAIN s : <<s[i],s[j]>> \in TopologicalOrder(G) => j < i 
+        /\ \A i,j \in DOMAIN s : <<s[i],s[j]>> \in TopologicalOrder(G) => j < i
+   
+(***************************************************************************)
+(* EPaxos graph processing                                                 *)
+(***************************************************************************)
+RECURSIVE EPaxosLinRec(_,_) 
+EPaxosLinRec(s, sccs) ==
+    IF sccs # <<>>
+    THEN 
+        LET sccLin == CHOOSE es \in Seq(Head(sccs)) :
+                NoDup(es) /\  Len(es) = Cardinality(sccs[1]) 
+        IN EPaxosLinRec(sccLin \o s, Tail(sccs))
+    ELSE s
+
+EPaxosLinearization(G) ==
+    LET SCCLin == Linearization(SCCGraph(G))
+    IN  EPaxosLinRec(<<>>, SCCLin)
+ 
 
 (***************************************************************************)
 (* For TLC                                                                 *)
 (***************************************************************************)
 CONSTANT V, MaxSeq \* A set for containing model values (for TLC).
 BSeq(X) == {<<>>} \cup UNION {[1..n -> X] : n \in 1..MaxSeq}
+
+(***************************************************************************)
+(* THE END                                                                 *)
+(***************************************************************************)
 
 (***************************************************************************)
 (* I'm not sure anymore what all stuff below does...                       *)
@@ -218,5 +239,5 @@ Cycles(G) == CyclesRec(G, {})
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Feb 04 14:02:18 EST 2016 by nano
+\* Last modified Thu Feb 04 15:40:41 EST 2016 by nano
 \* Created Tue Jul 28 03:10:02 CEST 2015 by nano
