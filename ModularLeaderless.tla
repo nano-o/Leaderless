@@ -65,27 +65,27 @@ Spec == Init /\[][Next]_conss
 (***************************************************************************)
 (* A decision never changes                                                *)
 (***************************************************************************)
-\*DecisionIrrevocable == [](\A v \in V : \A deps \in Deps : conss[v].decided = deps 
-\*    => [](conss[v].decided = deps))
-\*THEOREM Spec => DecisionIrrevocable
+DecisionIrrevocable == [](\A v \in V : \A deps \in Deps : conss[v].decided = deps 
+    => [](conss[v].decided = deps))
+THEOREM Spec => DecisionIrrevocable
 
 (***************************************************************************)
 (* A command is committed at most once                                     *)
 (***************************************************************************)
-\*AtMostOnce == \A v \in DOMAIN committed : Cardinality(committed[v]) = 1
-\*THEOREM Spec => []AtMostOnce
+AtMostOnce == \A v \in DOMAIN committed : Cardinality(committed[v]) = 1
+THEOREM Spec => []AtMostOnce
 
 (***************************************************************************)
 (* The set of dependencies committed for v (by invariant AtMostOnce, this  *)
 (* set is uniquely determined.                                             *)
 (***************************************************************************)
-\*TheDeps(v) == CHOOSE deps \in committed[v] : TRUE
+TheDeps(v) == CHOOSE deps \in committed[v] : TRUE
 
-\*Graph(committed_) == [v \in DOMAIN committed_ |-> TheDeps(v)]
+Graph(committed_) == [v \in DOMAIN committed_ |-> TheDeps(v)]
        
-\*THEOREM Spec => []Agreement(Graph(committed))
+THEOREM Spec => []Agreement(Graph(committed))
 
 =============================================================================
 \* Modification History
-\* Last modified Fri Feb 05 11:14:20 EST 2016 by nano
+\* Last modified Fri Feb 05 12:09:22 EST 2016 by nano
 \* Created Thu Feb 04 12:27:45 EST 2016 by nano

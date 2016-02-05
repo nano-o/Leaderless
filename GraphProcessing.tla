@@ -117,6 +117,9 @@ DependencyGraphInvariant(g) ==
 (* dominating v1 and l2 is obtained by running the graph processing        *)
 (* algorithm on the subgraph of g consisting of the nodes not strictly     *)
 (* dominating v2, then l1 is a prefix of l2 or vice versa.                 *)
+(*                                                                         *)
+(* To prevent TLC from evaluating Safety by default, we give Safety a      *)
+(* parameter that is of no other use.                                      *)
 (***************************************************************************)
 Safety(x) == \A g \in Graphs(TRUE) : DependencyGraphInvariant(g) => Agreement(g)
 
@@ -133,5 +136,5 @@ SafetyDebug(x) == \A g \in Graphs(TRUE) :
     
 =============================================================================
 \* Modification History
-\* Last modified Fri Feb 05 10:11:10 EST 2016 by nano
+\* Last modified Fri Feb 05 12:10:53 EST 2016 by nano
 \* Created Fri Feb 05 09:08:21 EST 2016 by nano
