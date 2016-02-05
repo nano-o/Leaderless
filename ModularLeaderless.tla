@@ -76,6 +76,10 @@ THEOREM Spec => DecisionIrrevocable
 AtMostOnce == \A v \in DOMAIN committed : Cardinality(committed[v]) = 1
 THEOREM Spec => []AtMostOnce
 
+(***************************************************************************)
+(* The set of dependencies committed for v (by invariant AtMostOnce, this  *)
+(* set is uniquely determined.                                             *)
+(***************************************************************************)
 TheDeps(v, committed_) == CHOOSE deps \in committed_[v] : TRUE
 
 (***************************************************************************)
@@ -95,25 +99,32 @@ CanExecRec(v, seen, committed_) ==
 CanExec(v) == CanExecRec(v, {v}, committed)
 
 (***************************************************************************)
-(* The part of the graph that does not dominate v.                         *)
+(* The part of the graph that does not dominate v.  This graph is of the   *)
+(* form                                                                    *)
+(*                                                                         *)
+(*     SUBSET V \times SUBSET (V \times V)                                 *)
 (***************************************************************************)
-SubGraph(v, committed_) == 
-    LET Vs == {v2 \in DOMAIN committed_ : \neg
-            /\ v \in TheDeps(v2, committed_) 
-            /\ v2 \notin TheDeps(v, committed_)}
-    IN [v2 \in Vs |-> TheDeps(v2, committed_)]
-
+SubGraph(v, committed_) ==
+    LET Graph == ConvertGraph(committed_)
+        Vs == {v2 \in Vertices(Graph) : \neg
+            Dominates(v2,v,Graph) /\ \neg Dominates(v,v2,Graph) }
+        Es == {e \in Edges(Graph) : e[1] \in Vs /\ e[2] \in Vs}
+    IN <<Vs, Es>>
+    
 (***************************************************************************)
-(* The Agreement property:                                                 *)
+(* The Agreement property: if two values v1 and v2 have all of their       *)
+(* dependencies committed (i.e.  can be executed) then if l1 is obtained   *)
+(* by linearizing the subgraph of v1 and l2 is obtained by linearizing the *)
+(* subgraph of v2 then l2 is a prefix of l1 or vice versa.                 *)
 (***************************************************************************)
 Agreement == \A v1,v2 \in DOMAIN committed :
     (v1 # v2 /\ CanExec(v1) /\ CanExec(v2))
-    => LET  l1 == EPaxosLinearization(ConvertGraph(SubGraph(v1, committed)))
-            l2 == EPaxosLinearization(ConvertGraph(SubGraph(v2, committed)))
+    => LET  l1 == EPaxosLinearization(SubGraph(v1, committed))
+            l2 == EPaxosLinearization(SubGraph(v2, committed))
        IN   Prefix(l1,l2) \/ Prefix(l2,l1)
 THEOREM Spec => []Agreement
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Feb 04 23:07:37 EST 2016 by nano
+\* Last modified Fri Feb 05 08:46:57 EST 2016 by nano
 \* Created Thu Feb 04 12:27:45 EST 2016 by nano
