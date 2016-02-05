@@ -47,17 +47,7 @@ THEOREM \A es \in Seq(Nat) : NoDup(es) = NoDup2(es)
 (***************************************************************************)
 Vertices(G) == G[1]
 Edges(G) == G[2]
-IsPreDigraph(G) == Edges(G) \subseteq (Vertices(G) \times Vertices(G))
-
-(****************************************************************************
-The set of all the vertices appearing in Edges(G)
-****************************************************************************)
-EdgeSupport(G) == 
-    {e[1] : e \in Edges(G)} \cup {e[2] : e \in Edges(G)}
-
-IsDiGraph(G, Vs) ==
-    /\  IsPreDigraph(G)
-    /\  EdgeSupport(G) \subseteq Vertices(G)
+IsDigraph(G) == Edges(G) \subseteq (Vertices(G) \times Vertices(G))
 
 (***************************************************************************)
 (* Recursive implementation of Dominates(v1,v2,G).                         *)
@@ -167,5 +157,5 @@ TotalOrder(G) ==
 
 =============================================================================
 \* Modification History
-\* Last modified Fri Feb 05 09:18:34 EST 2016 by nano
+\* Last modified Fri Feb 05 17:21:57 EST 2016 by nano
 \* Created Tue Jul 28 03:10:02 CEST 2015 by nano
