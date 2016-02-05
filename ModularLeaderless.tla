@@ -72,11 +72,49 @@ THEOREM Spec => DecisionIrrevocable
 (***************************************************************************)
 (* A command is committed at most once                                     *)
 (***************************************************************************)
-AtMostOnce == \A v \in V : v \in DOMAIN committed 
-    => Cardinality(committed[v]) = 1
+AtMostOnce == \A v \in DOMAIN committed : Cardinality(committed[v]) = 1
 THEOREM Spec => []AtMostOnce
+
+TheDeps(v, committed_) == CHOOSE deps \in committed_[v] : TRUE
+
+(***************************************************************************)
+(* Recursive definition of the CanExec(_,_) operator below.                *)
+(***************************************************************************)
+RECURSIVE CanExecRec(_,_,_)
+CanExecRec(v, seen, committed_) ==
+    /\  v \in DOMAIN committed_
+    /\  LET deps == TheDeps(v, committed_)
+        IN \A v2 \in deps : 
+            \/  v2 \in seen
+            \/  CanExecRec(v2, seen \cup {v2}, committed_)
+
+(***************************************************************************)
+(* Tests whether all the dependencies of a value have been committed.      *)
+(***************************************************************************)          
+CanExec(v) == CanExecRec(v, {v}, committed)
+
+(***************************************************************************)
+(* The part of the graph that does not dominate v.                         *)
+(***************************************************************************)
+SubGraph(v, committed_) == 
+    LET Vs == {v2 \in DOMAIN committed_ : \neg
+            /\ v \in TheDeps(v2, committed_) 
+            /\ v2 \notin TheDeps(v2, committed_)}
+    IN [v2 \in Vs |-> committed_[v2]]
+
+UniqueDeps == [v \in DOMAIN committed |-> TheDeps(v, committed)]
+
+(***************************************************************************)
+(* The Agreement property:                                                 *)
+(***************************************************************************)
+Agreement == \A v1,v2 \in DOMAIN committed :
+    v1 # v2 /\ CanExec(v1) /\ CanExec(v2)
+    => LET  l1 == EPaxosLinearization(ConvertGraph(SubGraph(v1, UniqueDeps)))
+            l2 == EPaxosLinearization(ConvertGraph(SubGraph(v2, UniqueDeps)))
+       IN   Prefix(l1,l2) \/ Prefix(l2,l1)
+THEOREM Spec => []Agreement
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Feb 04 18:34:18 EST 2016 by nano
+\* Last modified Thu Feb 04 19:33:10 EST 2016 by nano
 \* Created Thu Feb 04 12:27:45 EST 2016 by nano
