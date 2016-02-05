@@ -155,46 +155,17 @@ SCCGraph(G) ==
 (***************************************************************************)
 (* A sequence of vertices such that if v1 is related to v2 in the          *)
 (* topological order of the graph G, then v2 appears before v1 in the      *)
-(* sequence.                                                               *)
+(* sequence.  In other words, a total order compatible with the partial    *)
+(* order given by the graph.                                               *)
 (***************************************************************************)
-Linearization(G) ==
+TotalOrder(G) ==
     CHOOSE s \in BSeq(Vertices(G), Cardinality(Vertices(G))) :
         /\ NoDup(s) 
         /\ \A v \in Vertices(G) : \E i \in DOMAIN s : s[i] = v
         /\ \A i,j \in DOMAIN s : <<s[i],s[j]>> \in TopologicalOrder(G) => j < i
-   
-(***************************************************************************)
-(* EPaxos graph processing                                                 *)
-(***************************************************************************)
-RECURSIVE EPaxosLinRec(_,_) 
-EPaxosLinRec(s, sccs) ==
-    IF sccs # <<>>
-    THEN 
-        LET sccLin == CHOOSE es \in BSeq(Head(sccs), Cardinality(Head(sccs))) :
-                NoDup(es) /\ Len(es) = Cardinality(Head(sccs)) 
-        IN EPaxosLinRec(sccLin \o s, Tail(sccs))
-    ELSE s
-
-EPaxosLinearization(G) ==
-    LET SCCLin == Linearization(SCCGraph(G))
-    IN  EPaxosLinRec(<<>>, SCCLin)
-
-(***************************************************************************)
-(* Converts a graph in the form                                            *)
-(*                                                                         *)
-(*     [V -> SUBSET V]                                                     *)
-(*                                                                         *)
-(* to the form                                                             *)
-(*                                                                         *)
-(*     SUBSET V \times SUBSET (V \times V)                                 *)
-(***************************************************************************)
-ConvertGraph(G) ==
-    LET Vs == DOMAIN G
-        Es == UNION { {<<v1,v2>> : v2 \in G[v1] \ {v1}} : v1 \in DOMAIN G}
-    IN <<Vs, Es>>
 
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Feb 04 23:17:10 EST 2016 by nano
+\* Last modified Fri Feb 05 09:18:34 EST 2016 by nano
 \* Created Tue Jul 28 03:10:02 CEST 2015 by nano

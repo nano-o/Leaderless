@@ -1,6 +1,6 @@
 ------------------------- MODULE ModularLeaderless -------------------------
 
-EXTENDS DiGraph, Common
+EXTENDS GraphProcessing, Common
 
 VARIABLE 
     conss, \* An array of states of consensus instances
@@ -119,12 +119,12 @@ SubGraph(v, committed_) ==
 (***************************************************************************)
 Agreement == \A v1,v2 \in DOMAIN committed :
     (v1 # v2 /\ CanExec(v1) /\ CanExec(v2))
-    => LET  l1 == EPaxosLinearization(SubGraph(v1, committed))
-            l2 == EPaxosLinearization(SubGraph(v2, committed))
+    => LET  l1 == LinearizeDeps(SubGraph(v1, committed))
+            l2 == LinearizeDeps(SubGraph(v2, committed))
        IN   Prefix(l1,l2) \/ Prefix(l2,l1)
 THEOREM Spec => []Agreement
 
 =============================================================================
 \* Modification History
-\* Last modified Fri Feb 05 08:46:57 EST 2016 by nano
+\* Last modified Fri Feb 05 09:17:12 EST 2016 by nano
 \* Created Thu Feb 04 12:27:45 EST 2016 by nano
