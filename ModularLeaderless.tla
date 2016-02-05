@@ -30,6 +30,7 @@ Init ==
 (* proposed with deps1 and deps2, either v1 is in deps2 or vice versa.     *)
 (***************************************************************************)
 Propose(v, deps) ==
+    /\  v \notin deps
     /\ \E s \in ConsInst!State : 
         /\ ConsInst!Propose(deps, conss[v], s)
         /\ conss' = [conss EXCEPT ![v] = s]
@@ -99,22 +100,20 @@ CanExec(v) == CanExecRec(v, {v}, committed)
 SubGraph(v, committed_) == 
     LET Vs == {v2 \in DOMAIN committed_ : \neg
             /\ v \in TheDeps(v2, committed_) 
-            /\ v2 \notin TheDeps(v2, committed_)}
-    IN [v2 \in Vs |-> committed_[v2]]
-
-UniqueDeps == [v \in DOMAIN committed |-> TheDeps(v, committed)]
+            /\ v2 \notin TheDeps(v, committed_)}
+    IN [v2 \in Vs |-> TheDeps(v2, committed_)]
 
 (***************************************************************************)
 (* The Agreement property:                                                 *)
 (***************************************************************************)
 Agreement == \A v1,v2 \in DOMAIN committed :
-    v1 # v2 /\ CanExec(v1) /\ CanExec(v2)
-    => LET  l1 == EPaxosLinearization(ConvertGraph(SubGraph(v1, UniqueDeps)))
-            l2 == EPaxosLinearization(ConvertGraph(SubGraph(v2, UniqueDeps)))
+    (v1 # v2 /\ CanExec(v1) /\ CanExec(v2))
+    => LET  l1 == EPaxosLinearization(ConvertGraph(SubGraph(v1, committed)))
+            l2 == EPaxosLinearization(ConvertGraph(SubGraph(v2, committed)))
        IN   Prefix(l1,l2) \/ Prefix(l2,l1)
 THEOREM Spec => []Agreement
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Feb 04 19:33:10 EST 2016 by nano
+\* Last modified Thu Feb 04 23:07:37 EST 2016 by nano
 \* Created Thu Feb 04 12:27:45 EST 2016 by nano
