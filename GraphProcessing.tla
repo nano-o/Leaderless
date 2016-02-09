@@ -56,6 +56,10 @@ LinearizeDepsRec(s, sccs, f) ==
     THEN LinearizeDepsRec(f[Head(sccs)] \o s, Tail(sccs), f)
     ELSE s
 
+(***************************************************************************)
+(* TODO: LinearizeDeps should also take as parameter a linearization       *)
+(* function for linearizing the sccs.                                      *)
+(***************************************************************************)
 LinearizeDeps(G, f) ==
     LET sccSeq == TotalOrder(SCCGraph(G))
     IN  LinearizeDepsRec(<<>>, sccSeq, f)
@@ -89,12 +93,12 @@ SubGraph(v, g) ==
         Es == {e \in Edges(G) : e[1] \in Vs /\ e[2] \in Vs}
     IN <<Vs, Es>>
     
-(***************************************************************************)
-(* The Agreement property: if two values v1 and v2 have all of their       *)
-(* dependencies graph (i.e.  can be executed) then if l1 is obtained   *)
-(* by linearizing the subgraph of v1 and l2 is obtained by linearizing the *)
-(* subgraph of v2 then l2 is a prefix of l1 or vice versa.                 *)
-(***************************************************************************)
+(****************************************************************************
+The Agreement property: if two values v1 and v2 have all of their
+dependencies graph (i.e.  can be executed) then if l1 is obtained by
+linearizing the subgraph of v1 and l2 is obtained by linearizing the
+subgraph of v2 then l2 is a prefix of l1 or vice versa.
+****************************************************************************)
 Agreement(g, f) == \A v1,v2 \in DOMAIN g :
     (v1 # v2 /\ CanExec(v1, g) /\ CanExec(v2, g))
     => LET  l1 == LinearizeDeps(SubGraph(v1, g), f)
@@ -110,7 +114,41 @@ DependencyGraphInvariant(g) ==
     LET G == ConvertGraph(g)
     IN \A v1,v2 \in Vertices(G) :
         v1 # v2 => Dominates(v1, v2, G) \/ Dominates(v2, v1, G)
+        
+(***************************************************************************)
+(* We now define linearization functions.                                  *)
+(***************************************************************************)
 
+(***************************************************************************)
+(* The set of sequences of elements of X and of length Cardinality(X).     *)
+(***************************************************************************)
+Lins(X) == { seq \in [1..Cardinality(X) -> X] : NoDup(seq)}
+
+(***************************************************************************)
+(* LinFunsRec(SUBSET X) shoud be the same as                               *)
+(*                                                                         *)
+(*     {seq \in [SUBSET X -> BSeq(X,Cardinality(X))] :                     *)
+(*         Len(seq) = Cardinality(X) /\ NoDup(X) }                         *)
+(***************************************************************************)
+RECURSIVE LinFunsRec(_)
+LinFunsRec(domain) ==
+    LET Vs1 == CHOOSE Vs1 \in domain : TRUE
+        recDom == domain \ {Vs1}
+        recFuns == LinFunsRec(recDom)
+        seqs == Lins(Vs1)
+    IN  IF domain = {} THEN {<<>>}
+        ELSE
+            UNION {
+                {[Vs \in domain |-> IF Vs = Vs1 THEN seq ELSE f[Vs]] : seq \in seqs}
+                    : f \in recFuns }
+
+LinFunsDecl(X) == {seq \in [SUBSET X -> BSeq(X,Cardinality(X))] :
+        Len(seq) = Cardinality(X) /\ NoDup(X) }
+        
+THEOREM \A X : LinFunsDecl(X) = LinFunsRec(SUBSET X)
+
+LinFuns == LinFunsRec(SUBSET V)
+        
 (***************************************************************************)
 (* The safety property of the graph processing algorithm: if the           *)
 (* dependency invariant is satisfied in a graph g, then for any two values *)
@@ -127,7 +165,7 @@ DependencyGraphInvariant(g) ==
 Safety(f) == \A g \in Graphs(TRUE) : 
     DependencyGraphInvariant(g) => Agreement(g, f)
 
-THEOREM \A f \in [SUBSET V -> BSeq(V, Cardinality(V))] : 
+THEOREM \A f \in LinFuns : 
     IsLinFun(f) => Safety(f)
 
 SafetyDebug(f) == \A g \in Graphs(TRUE) :
@@ -139,6 +177,11 @@ SafetyDebug(f) == \A g \in Graphs(TRUE) :
         /\  FALSE
     ELSE TRUE
 
+(***************************************************************************)
+(* An interference relation is reflexive but does not contain <<v,v>> for  *)
+(* any v (a request always commutes with itself, because we assume that    *)
+(* requests are uniquely identified and should not have effect twice).     *)
+(***************************************************************************)
 IsInterferenceRelation(R) ==
     /\ R \subseteq V \times V 
     /\ \A v \in V : \neg <<v,v>> \in R
@@ -146,6 +189,9 @@ IsInterferenceRelation(R) ==
 
 ReflexiveClosure(R) == {d \in V \times V : d \in R \/ <<d[2],d[1]>> \in R}
 
+(***************************************************************************)
+(* The prefix relation up to the reordering of commutative commands.       *)
+(***************************************************************************)
 PrefixUpTo(s1, s2, R) ==
     /\  IF \neg (NoDup(s1) /\ NoDup(s2))
         THEN PrintT("WARNING, PrefixUpTo used on sequences with duplicates") 
@@ -160,69 +206,60 @@ PrefixUpTo(s1, s2, R) ==
                     /\  es[i] = s2[k]
                     /\  es[j] = s2[l] }
         IN \E p \in permutations : Prefix(s1,p)
-        
+
+(***************************************************************************)
+(* The dependency graph invariant, taking into account commutativity.      *)
+(***************************************************************************)
 DependencyGraphInvariant2(g, R) ==
     LET G == ConvertGraph(g)
     IN \A v1,v2 \in Vertices(G) :
         v1 # v2 /\ <<v1,v2>> \in R => 
             <<v1, v2>> \in Edges(G) \/ <<v2, v1>> \in Edges(G)
 
-(*Agreement2(g, R, f) == \A v1,v2 \in DOMAIN g :
+(***************************************************************************)
+(* Agreement up to the reordering of commutative values.                   *)
+(***************************************************************************)
+Agreement2(g, R, f) == \A v1,v2 \in DOMAIN g :
     (v1 # v2 /\ CanExec(v1, g) /\ CanExec(v2, g))
     => LET  l1 == LinearizeDeps(SubGraph(v1, g), f)
             l2 == LinearizeDeps(SubGraph(v2, g), f)
        IN   PrefixUpTo(l1,l2,R) \/ PrefixUpTo(l2,l1,R)
-*)
 
-Agreement2(g, f) == \A v1,v2 \in DOMAIN g :
+(***************************************************************************)
+(* The safety property, version with commutativity.                        *)
+(***************************************************************************)
+Safety2(f, R) == \A g \in Graphs(TRUE) : 
+    DependencyGraphInvariant2(g, R) => Agreement2(g, R, f)
+
+(***************************************************************************)
+(* A broken version of agreement, for testing purposes.                    *)
+(***************************************************************************)
+AgreementBroken(g, f) == \A v1,v2 \in DOMAIN g :
     (v1 # v2 /\ CanExec(v1, g) /\ CanExec(v2, g))
     => LET  l1 == LinearizeDeps(SubGraph(v1, g), f)
             l2 == LinearizeDeps(SubGraph(v2, g), f)
        IN   PrintT(<<l1,l2>>) /\ (Prefix(l1,l2) \/ Prefix(l2,l1))
-       
-Safety2(f, R) == \A g \in Graphs(TRUE) : 
-    DependencyGraphInvariant2(g, R) => Agreement2(g, f)
 
-PermF(X, b) == { f \in UNION {[1..b -> X]} : NoDup(f)}
-
-RECURSIVE LinFunsRec(_)
-LinFunsRec(domain) ==
-    LET vs == CHOOSE vs \in domain : TRUE
-        recDom == domain \ {vs}
-        recFuns == LinFunsRec(recDom)
-        seqs == PermF(vs, Cardinality(vs))
-    IN  IF domain = {} THEN {<<>>}
-        ELSE
-            UNION {
-                {[Vs \in domain |-> IF Vs = vs THEN seq ELSE f[Vs]] : seq \in seqs}
-                    : f \in recFuns }
-
-LinFuns == LinFunsRec(SUBSET V)
-
-(*
-CONSTANT MyR
-ASSUME IsInterferenceRelation(MyR)
-THEOREM 
-    \A f \in LinFuns : IsInterferenceRelation(MyR) => Safety2(f, MyR)
-*)
-
-THEOREM 
-    \A f \in LinFuns :
-        \A R \in SUBSET (V \times V) :
-            IsInterferenceRelation(R) => Safety2(f, R)
+(***************************************************************************)
+(* The safety property should hold for any linearization function f and    *)
+(* any interference relation R.                                            *)
+(***************************************************************************)
+THEOREM \A f \in LinFuns :
+    \A R \in SUBSET (V \times V) :
+        IsInterferenceRelation(R) => Safety2(f, R)
 
 
 Test == 
     LET f == CHOOSE f \in LinFuns : TRUE
     IN  \A R \in SUBSET (V \times V) :
             IsInterferenceRelation(R) => (\A g \in Graphs(TRUE) : 
-                IF \neg (DependencyGraphInvariant2(g, R) => Agreement2(g, f))
+                IF \neg (DependencyGraphInvariant2(g, R) => AgreementBroken(g, f))
                 THEN \neg PrintT(<<g,R>>)
                 ELSE TRUE
             )
     
 =============================================================================
 \* Modification History
+\* Last modified Mon Feb 08 21:37:12 EST 2016 by nano
 \* Last modified Mon Feb 08 17:45:35 EST 2016 by sebastianopeluso
-\* Last modified Fri Feb 05 17:47:54 EST 2016 by nano
 \* Created Fri Feb 05 09:08:21 EST 2016 by nano
