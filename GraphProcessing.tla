@@ -10,7 +10,7 @@
 (* giving for each vertex v its set of neighbors.                          *)
 (***************************************************************************)
 
-EXTENDS DiGraph, OrderRelations
+EXTENDS DiGraph
 
 (***************************************************************************)
 (* The set of all graphs of the form                                       *)
@@ -34,7 +34,7 @@ Graphs(x) == UNION {[Vs -> SUBSET V] : Vs \in SUBSET V}
 ConvertGraph(G) ==
     LET Vs == DOMAIN G
         Es == UNION { {<<v1,v2>> : v2 \in (G[v1] \ {v1}) \cap Vs} : 
-            v1 \in DOMAIN G}
+            v1 \in Vs}
     IN <<Vs, Es>>
    
 (***************************************************************************)
@@ -73,8 +73,8 @@ LinFunsRec(domain) ==
                 {[Vs \in domain |-> IF Vs = Vs1 THEN seq ELSE f[Vs]] : seq \in seqs}
                     : f \in recFuns }
 
-LinFunsDecl(X) == {seq \in [SUBSET X -> BSeq(X,Cardinality(X))] :
-        Len(seq) = Cardinality(X) /\ NoDup(X) }
+LinFunsDecl(X) == {f \in [SUBSET X -> BSeq(X,Cardinality(X))] :
+        \A xs \in DOMAIN f : Len(f[xs]) = Cardinality(xs) /\ NoDup(f[xs]) }
         
 THEOREM \A X : LinFunsDecl(X) = LinFunsRec(SUBSET X)
 
@@ -156,7 +156,12 @@ Agreement(g, f) == \A v1,v2 \in DOMAIN g :
     => LET  l1 == LinearizeDeps(SubGraph(v1, g), f)
             l2 == LinearizeDeps(SubGraph(v2, g), f)
        IN   Prefix(l1,l2) \/ Prefix(l2,l1)
-
+       
+Agreement3(g, f) == \A v1,v2 \in DOMAIN g :
+    (v1 # v2)
+    => LET  l1 == LinearizeDeps(SubGraph(v1, g), f)
+            l2 == LinearizeDeps(SubGraph(v2, g), f)
+       IN   Prefix(l1,l2) \/ Prefix(l2,l1)
 (***************************************************************************)
 (* The invariant that EPaxos maintains: two non-commutative commands are   *)
 (* necessarily related in the graph.  Here we assume that all command are  *)
@@ -267,7 +272,7 @@ THEOREM \A f \in LinFunsRec(SUBSET V) :
         IsInterferenceRelation(R) => Safety2(f, R)
 
 
-Test == 
+Test(x) == 
     LET f == CHOOSE f \in LinFunsRec(SUBSET V) : TRUE
     IN  \A R \in SUBSET (V \times V) :
             IsInterferenceRelation(R) => (\A g \in Graphs(TRUE) : 
@@ -278,5 +283,5 @@ Test ==
     
 =============================================================================
 \* Modification History
-\* Last modified Tue Feb 09 09:14:21 EST 2016 by nano
+\* Last modified Tue Feb 09 13:57:34 EST 2016 by nano
 \* Created Fri Feb 05 09:08:21 EST 2016 by nano

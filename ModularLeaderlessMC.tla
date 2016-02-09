@@ -3,7 +3,7 @@
 EXTENDS GraphProcessing, Common
 
 VARIABLE 
-    conss, \* An array of states of consensus instances
+    conss, \* An array of states of consensus instances.
     proposed, \* Maps a value to the sets of dependencies that have been proposed for this value.
     committed, \* Maps a value to its committed set of dependencies.
     state
@@ -82,5 +82,5 @@ THEOREM \A f \in LinFunsRec(SUBSET V) : Spec => []Agreement(Graph(committed), f)
 
 =============================================================================
 \* Modification History
-\* Last modified Tue Feb 09 09:08:39 EST 2016 by nano
+\* Last modified Tue Feb 09 10:12:55 EST 2016 by nano
 \* Created Fri Feb 05 15:02:31 EST 2016 by nano
