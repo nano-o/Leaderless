@@ -10,7 +10,7 @@
 (* giving for each vertex v its set of neighbors.                          *)
 (***************************************************************************)
 
-EXTENDS DiGraph
+EXTENDS DiGraph, OrderRelations
 
 (***************************************************************************)
 (* The set of all graphs of the form                                       *)
@@ -44,12 +44,57 @@ ConvertGraph(G) ==
 (* connected component in a sequence, and finally concatenate all the      *)
 (* obtained sequences in the order given by TG.                            *)
 (***************************************************************************)
+
+(***************************************************************************)
+(* We start by defining linearization functions, which map sets to         *)
+(* sequences of their elements.                                            *)
+(***************************************************************************)
+
+(***************************************************************************)
+(* The set of sequences of elements of X and of length Cardinality(X).     *)
+(***************************************************************************)
+Lins(X) == { seq \in [1..Cardinality(X) -> X] : NoDup(seq)}
+
+(***************************************************************************)
+(* LinFunsRec(SUBSET X) shoud be the same as                               *)
+(*                                                                         *)
+(*     {seq \in [SUBSET X -> BSeq(X,Cardinality(X))] :                     *)
+(*         Len(seq) = Cardinality(X) /\ NoDup(X) }                         *)
+(***************************************************************************)
+RECURSIVE LinFunsRec(_)
+LinFunsRec(domain) ==
+    LET Vs1 == CHOOSE Vs1 \in domain : TRUE
+        recDom == domain \ {Vs1}
+        recFuns == LinFunsRec(recDom)
+        seqs == Lins(Vs1)
+    IN  IF domain = {} THEN {<<>>}
+        ELSE
+            UNION {
+                {[Vs \in domain |-> IF Vs = Vs1 THEN seq ELSE f[Vs]] : seq \in seqs}
+                    : f \in recFuns }
+
+LinFunsDecl(X) == {seq \in [SUBSET X -> BSeq(X,Cardinality(X))] :
+        Len(seq) = Cardinality(X) /\ NoDup(X) }
+        
+THEOREM \A X : LinFunsDecl(X) = LinFunsRec(SUBSET X)
+
 IsLinFun(f) ==
     /\ DOMAIN f = SUBSET V
     /\ \A Vs \in SUBSET V : LET seq == f[Vs] IN
             /\  seq \in [1..Cardinality(Vs) -> Vs]
             /\  NoDup(seq)
 
+(***************************************************************************)
+(* Enumerating the linearization function for sccs.                        *)
+(***************************************************************************)
+
+SCCPartialOrders == {}
+
+(***************************************************************************)
+(* Given a sequence of sets of vertices (the strongly connected components *)
+(* of the initial graph), linearize each scc and concatenate all the       *)
+(* obtained sequences.                                                     *)
+(***************************************************************************)
 RECURSIVE LinearizeDepsRec(_,_,_) 
 LinearizeDepsRec(s, sccs, f) ==
     IF sccs # <<>>
@@ -63,7 +108,14 @@ LinearizeDepsRec(s, sccs, f) ==
 LinearizeDeps(G, f) ==
     LET sccSeq == TotalOrder(SCCGraph(G))
     IN  LinearizeDepsRec(<<>>, sccSeq, f)
-    
+
+(***************************************************************************)
+(* Also takes as parameter a linearization function for sccs.              *)
+(***************************************************************************)
+LinearizeDeps2(G, f, F) ==
+    LET sccSeq == F[SCCGraph(G)]
+    IN  LinearizeDepsRec(<<>>, sccSeq, f)
+        
 (***************************************************************************)
 (* CanExec(v, g) tests whether all the dependencies of a vertice v have    *)
 (* are in the domain of the graph g.  We must have g \in Graphs.           *)
@@ -116,40 +168,6 @@ DependencyGraphInvariant(g) ==
         v1 # v2 => Dominates(v1, v2, G) \/ Dominates(v2, v1, G)
         
 (***************************************************************************)
-(* We now define linearization functions.                                  *)
-(***************************************************************************)
-
-(***************************************************************************)
-(* The set of sequences of elements of X and of length Cardinality(X).     *)
-(***************************************************************************)
-Lins(X) == { seq \in [1..Cardinality(X) -> X] : NoDup(seq)}
-
-(***************************************************************************)
-(* LinFunsRec(SUBSET X) shoud be the same as                               *)
-(*                                                                         *)
-(*     {seq \in [SUBSET X -> BSeq(X,Cardinality(X))] :                     *)
-(*         Len(seq) = Cardinality(X) /\ NoDup(X) }                         *)
-(***************************************************************************)
-RECURSIVE LinFunsRec(_)
-LinFunsRec(domain) ==
-    LET Vs1 == CHOOSE Vs1 \in domain : TRUE
-        recDom == domain \ {Vs1}
-        recFuns == LinFunsRec(recDom)
-        seqs == Lins(Vs1)
-    IN  IF domain = {} THEN {<<>>}
-        ELSE
-            UNION {
-                {[Vs \in domain |-> IF Vs = Vs1 THEN seq ELSE f[Vs]] : seq \in seqs}
-                    : f \in recFuns }
-
-LinFunsDecl(X) == {seq \in [SUBSET X -> BSeq(X,Cardinality(X))] :
-        Len(seq) = Cardinality(X) /\ NoDup(X) }
-        
-THEOREM \A X : LinFunsDecl(X) = LinFunsRec(SUBSET X)
-
-LinFuns == LinFunsRec(SUBSET V)
-        
-(***************************************************************************)
 (* The safety property of the graph processing algorithm: if the           *)
 (* dependency invariant is satisfied in a graph g, then for any two values *)
 (* v1 and v2 in the domain of g and whose dependencies are all in the      *)
@@ -165,7 +183,7 @@ LinFuns == LinFunsRec(SUBSET V)
 Safety(f) == \A g \in Graphs(TRUE) : 
     DependencyGraphInvariant(g) => Agreement(g, f)
 
-THEOREM \A f \in LinFuns : 
+THEOREM \A f \in LinFunsRec(SUBSET V) : 
     IsLinFun(f) => Safety(f)
 
 SafetyDebug(f) == \A g \in Graphs(TRUE) :
@@ -244,13 +262,13 @@ AgreementBroken(g, f) == \A v1,v2 \in DOMAIN g :
 (* The safety property should hold for any linearization function f and    *)
 (* any interference relation R.                                            *)
 (***************************************************************************)
-THEOREM \A f \in LinFuns :
+THEOREM \A f \in LinFunsRec(SUBSET V) :
     \A R \in SUBSET (V \times V) :
         IsInterferenceRelation(R) => Safety2(f, R)
 
 
 Test == 
-    LET f == CHOOSE f \in LinFuns : TRUE
+    LET f == CHOOSE f \in LinFunsRec(SUBSET V) : TRUE
     IN  \A R \in SUBSET (V \times V) :
             IsInterferenceRelation(R) => (\A g \in Graphs(TRUE) : 
                 IF \neg (DependencyGraphInvariant2(g, R) => AgreementBroken(g, f))
@@ -260,6 +278,5 @@ Test ==
     
 =============================================================================
 \* Modification History
-\* Last modified Mon Feb 08 21:37:12 EST 2016 by nano
-\* Last modified Mon Feb 08 17:45:35 EST 2016 by sebastianopeluso
+\* Last modified Tue Feb 09 09:14:21 EST 2016 by nano
 \* Created Fri Feb 05 09:08:21 EST 2016 by nano

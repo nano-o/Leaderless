@@ -8,9 +8,7 @@
 
 EXTENDS FiniteSets, Sequences, Naturals, Common
 
-
 Image(f) == {f[x] : x \in DOMAIN f}
-
 
 (***************************************************************************)
 (* Prefix relation on sequences                                            *)
@@ -157,5 +155,5 @@ TotalOrder(G) ==
 
 =============================================================================
 \* Modification History
-\* Last modified Fri Feb 05 17:21:57 EST 2016 by nano
+\* Last modified Tue Feb 09 09:13:23 EST 2016 by nano
 \* Created Tue Jul 28 03:10:02 CEST 2015 by nano

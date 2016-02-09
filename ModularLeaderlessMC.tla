@@ -1,24 +1,22 @@
-------------------------- MODULE ModularLeaderless -------------------------
+------------------------ MODULE ModularLeaderlessMC ------------------------
 
 EXTENDS GraphProcessing, Common
 
 VARIABLE 
     conss, \* An array of states of consensus instances
     proposed, \* Maps a value to the sets of dependencies that have been proposed for this value.
-    committed \* Maps a value to its committed set of dependencies.
+    committed, \* Maps a value to its committed set of dependencies.
+    state
+
+ConsInterface == INSTANCE ConsensusInterface
 
 (***************************************************************************)
 (* Dependency sets                                                         *)
 (***************************************************************************)
 Deps == SUBSET V
 
-(***************************************************************************)
-(* Consensus instances to decide on dependency sets                        *)
-(***************************************************************************)
-ConsInterf == INSTANCE ConsensusInterface WITH V <- Deps
-
 Init == 
-    /\ conss = [v \in V |-> ConsInterf!Init]
+    /\ conss = [v \in V |-> ConsInterface!Init]
     /\ proposed = <<>>
     /\ committed = <<>>
 
@@ -29,10 +27,10 @@ Init ==
 (* proposed with deps1 and deps2, either v1 is in deps2 or vice versa.     *)
 (***************************************************************************)
 Propose(v, deps) ==
-    /\  v \notin deps
-    /\ \E s \in ConsInterf!State : 
-        /\ ConsInterf!Propose(deps, conss[v], s)
-        /\ conss' = [conss EXCEPT ![v] = s]
+    /\ v \notin deps
+    /\ conss' = [conss EXCEPT ![v] = 
+        [@ EXCEPT !.propose = @ \cup {v}, !.flag = \neg @]]
+    \* Ensure the graph invariant:
     /\ \A v2 \in DOMAIN proposed : v2 # v => 
             \A deps2 \in proposed[v2] : v \in deps2 \/ v2 \in deps  
     /\ proposed' = [v2 \in DOMAIN proposed \cup {v} |-> 
@@ -44,9 +42,9 @@ Propose(v, deps) ==
     /\  UNCHANGED committed
 
 Decide(v, deps) ==
-    /\ \E s \in ConsInterf!State :
-        /\  ConsInterf!Decide(deps, conss[v], s)
-        /\  conss' = [conss EXCEPT ![v] = s]
+    /\ v \in conss[v].proposed 
+    /\ conss[v].decided = None
+    /\ conss' = [conss EXCEPT ![v] = [@ EXCEPT !.decided = v, !.flag = \neg @]]
     /\ committed' = [v2 \in DOMAIN committed \cup {v} |-> 
         IF v2 = v THEN IF v2 \in DOMAIN committed 
             THEN committed[v2] \cup {deps}
@@ -54,11 +52,8 @@ Decide(v, deps) ==
         ELSE committed[v2]] 
     /\ UNCHANGED proposed
 
-Cons(state) == INSTANCE Consensus WITH V <- Deps
-
 Next ==
     /\ \E v \in V, deps \in Deps : Propose(v, deps) \/ Decide(v, deps)
-    /\ \E v \in V : Cons(conss[v])!Next
 
 Spec == Init /\[][Next]_conss
 
@@ -83,9 +78,9 @@ TheDeps(v) == CHOOSE deps \in committed[v] : TRUE
 
 Graph(committed_) == [v \in DOMAIN committed_ |-> TheDeps(v)]
        
-THEOREM \A f \in LinFuns : Spec => []Agreement(Graph(committed), f)
+THEOREM \A f \in LinFunsRec(SUBSET V) : Spec => []Agreement(Graph(committed), f)
 
 =============================================================================
 \* Modification History
-\* Last modified Tue Feb 09 09:01:07 EST 2016 by nano
-\* Created Thu Feb 04 12:27:45 EST 2016 by nano
+\* Last modified Tue Feb 09 09:08:39 EST 2016 by nano
+\* Created Fri Feb 05 15:02:31 EST 2016 by nano
