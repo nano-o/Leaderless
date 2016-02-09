@@ -47,9 +47,8 @@ ConvertGraph(G) ==
 IsLinFun(f) ==
     /\ DOMAIN f = SUBSET V
     /\ \A Vs \in SUBSET V : LET seq == f[Vs] IN
-            /\  seq \in BSeq(Vs, Cardinality(Vs))
+            /\  seq \in [1..Cardinality(Vs) -> Vs]
             /\  NoDup(seq)
-            /\  Len(seq) = Cardinality(Vs)
 
 RECURSIVE LinearizeDepsRec(_,_,_) 
 LinearizeDepsRec(s, sccs, f) ==
@@ -168,22 +167,62 @@ DependencyGraphInvariant2(g, R) ==
         v1 # v2 /\ <<v1,v2>> \in R => 
             <<v1, v2>> \in Edges(G) \/ <<v2, v1>> \in Edges(G)
 
-Agreement2(g, R, f) == \A v1,v2 \in DOMAIN g :
+(*Agreement2(g, R, f) == \A v1,v2 \in DOMAIN g :
     (v1 # v2 /\ CanExec(v1, g) /\ CanExec(v2, g))
     => LET  l1 == LinearizeDeps(SubGraph(v1, g), f)
             l2 == LinearizeDeps(SubGraph(v2, g), f)
        IN   PrefixUpTo(l1,l2,R) \/ PrefixUpTo(l2,l1,R)
+*)
 
+Agreement2(g, f) == \A v1,v2 \in DOMAIN g :
+    (v1 # v2 /\ CanExec(v1, g) /\ CanExec(v2, g))
+    => LET  l1 == LinearizeDeps(SubGraph(v1, g), f)
+            l2 == LinearizeDeps(SubGraph(v2, g), f)
+       IN   PrintT(<<l1,l2>>) /\ (Prefix(l1,l2) \/ Prefix(l2,l1))
+       
 Safety2(f, R) == \A g \in Graphs(TRUE) : 
-    DependencyGraphInvariant2(g, R) => Agreement2(g, R, f)
-   
+    DependencyGraphInvariant2(g, R) => Agreement2(g, f)
+
+PermF(X, b) == { f \in UNION {[1..b -> X]} : NoDup(f)}
+
+RECURSIVE LinFunsRec(_)
+LinFunsRec(domain) ==
+    LET vs == CHOOSE vs \in domain : TRUE
+        recDom == domain \ {vs}
+        recFuns == LinFunsRec(recDom)
+        seqs == PermF(vs, Cardinality(vs))
+    IN  IF domain = {} THEN {<<>>}
+        ELSE
+            UNION {
+                {[Vs \in domain |-> IF Vs = vs THEN seq ELSE f[Vs]] : seq \in seqs}
+                    : f \in recFuns }
+
+LinFuns == LinFunsRec(SUBSET V)
+
+(*
+CONSTANT MyR
+ASSUME IsInterferenceRelation(MyR)
 THEOREM 
-    \A f \in [SUBSET V -> BSeq(V, Cardinality(V))] :
+    \A f \in LinFuns : IsInterferenceRelation(MyR) => Safety2(f, MyR)
+*)
+
+THEOREM 
+    \A f \in LinFuns :
         \A R \in SUBSET (V \times V) :
-            IsLinFun(f) /\ IsInterferenceRelation(R) => Safety2(f, R)
+            IsInterferenceRelation(R) => Safety2(f, R)
 
 
+Test == 
+    LET f == CHOOSE f \in LinFuns : TRUE
+    IN  \A R \in SUBSET (V \times V) :
+            IsInterferenceRelation(R) => (\A g \in Graphs(TRUE) : 
+                IF \neg (DependencyGraphInvariant2(g, R) => Agreement2(g, f))
+                THEN \neg PrintT(<<g,R>>)
+                ELSE TRUE
+            )
+    
 =============================================================================
 \* Modification History
+\* Last modified Mon Feb 08 17:45:35 EST 2016 by sebastianopeluso
 \* Last modified Fri Feb 05 17:47:54 EST 2016 by nano
 \* Created Fri Feb 05 09:08:21 EST 2016 by nano
