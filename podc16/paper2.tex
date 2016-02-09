@@ -1,0 +1,49 @@
+\documentclass[11]{article}
+\usepackage[english]{babel}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{comment}
+\hypersetup{pdftex,colorlinks=true,allcolors=blue}
+%\usepackage{hypcap}
+\usepackage[url=true,doi=false,isbn=false,backend=biber]{biblatex}
+\addbibresource{managed.bib}
+%\setcounter{tocdepth}{2}
+%\usepackage{pdfpages}
+%\usepackage{wrapfig}
+%\makeatletter
+%\newcommand{\setword}[2]{%
+%    \phantomsection%
+%    #1\def\@currentlabel{\unexpanded{#1}}\label{#2}%
+%}
+%\makeatother
+
+\title{Brief Announcement: A Family of Leaderless Generalized-Consensus Algorithms}
+
+\author{}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Many agreement algorithms inspired by Paxos and MultiPaxos~\cite{lamport2001paxos} rely on the existence of a unique leader replica which enforces an ordering on commands during fault-free periods.
+In practice, the unique leader can easily become a performance bottleneck for the system.
+Therefore, recently proposed agreement algorithms like Mencius~\cite{MaoJunqueiraMarzullo08MenciusBuildingEfficientReplicatedStateMachine}, EPaxos~\cite{MoraruAndersenKaminsky13ThereIsMoreConsensusEgalitarianParliaments}, or Alvin~\cite{TurcuETAL14BeGeneralDontGiveUpConsistency} strive to increase performance by avoiding the use of a unique leader.
+Mencius rotates the leader among the replicas but its structure remains close to MultiPaxos. 
+However, EPaxos and Alvin are based on a novel algorithmic idea first introduced in EPaxos.
+
+In this paper, we show that the core algorithmic idea underlying EPaxos can be used to build a family of leaderless algorithms parameterized by (1) a per-command dependency-set computation algorithm, a concept that we define in the paper, and (2) an algorithm ensuring agreement on a mapping from commands to dependency sets. %(2) an algorithm ensuring a per-command agreement on a dependency set and which is oblivious of any ordering between commands. 
+An algorithm in the family is obtained by instantiating the two parameters to a concrete agreement algorithm and a concrete dependency-set computation algorithm, which are then used as sub-routines. 
+Note that any generalized consensus algorithm can be used to instantiate parameter 2, but that only a weaker problem than generalized consensus needs to be solved because no ordering constraints need to be enforced.
+
+We prove that all the algorithms in the family are safe and live, and we have formalized our ideas in TLA+ and thoroughly model-check our claims with the TLC model-checker.
+
+Our work sheds light on the common structure of algorithms like EPaxos and Alvin and allows to tune the performance of leaderless algorithms for specific scenarios by changing the underlying generalized-consensus and dependency-set algorithm. 
+We expect that these two tunable knobs will allow a principled theoretical and empirical evaluation of the trade-offs that can be achieved by this new family of algorithms.
+
+\printbibliography%
+
+\end{document}
