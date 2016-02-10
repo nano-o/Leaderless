@@ -30,7 +30,8 @@ We expect that these two tunable knobs will allow a principled theoretical and e
 \section{Leaderless Algorithms}
 
 We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network.
-We also consider a deterministic state-machine $M$ whose set of commands is $C$ and equipped with a dependency relation $R \subseteq C\times C$ such that for any command $c$, $\left( c,c \right)\notin R$; for any commands $c_1$ and $c_2$, if $\left( c_1,c_2 \right)\in R$ then $\left( c_2,c_1 \right)\in R$; if $\left( c_1,c_2 \right)\in R$ and $\aseq{s_1,c_1,s_2,c_2,\cdots,s_n}$
+We also consider a deterministic state-machine $M$ whose set of commands is $C$ and equipped with a dependency relation $R \subseteq C\times C$ such that for any command $c$, $\left( c,c \right)\notin R$; for any commands $c_1$ and $c_2$, if $\left( c_1,c_2 \right)\in R$ then $\left( c_2,c_1 \right)\in R$; if $\left( c_a,c_b \right)\in R$ then $\aseq{s_1,c_1,\cdots,s_i,c_a,s_{i+1},c_b,\cdots,s_n}$ is an execution of the state-machine $M$ if and only if
+$\aseq{s_1,c_1,\cdots,s_i,c_b,s_{i+1},c_a,\cdots,s_n}$.
 
 \subsection{Computing Dependency-Sets}
 
@@ -45,8 +46,10 @@ Moreover, a dependency-set computation algorithm must ensure that:
 
 \subsection{Agreeing on Dependency Sets}
 
-A map-agreement algorithm exposes 
+A map-agreement algorithm exposes the input action $propose\left( c, deps \right)$
 
-\printbibliography%
+%\printbibliography%
+\bibliography{managed}{}
+\bibliographystyle{plain}
 
 \end{document}
