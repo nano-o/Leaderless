@@ -29,7 +29,7 @@ We prove that all the algorithms in the family are safe and live, and we have fo
 Our work sheds light on the common structure of algorithms like EPaxos and Alvin and allows to tune the performance of leaderless algorithms for specific scenarios by changing the underlying generalized-consensus and dependency-set algorithm. 
 We expect that these two tunable knobs will allow a principled theoretical and empirical evaluation of the trade-offs that can be achieved by this new family of algorithms.
 
-\section{Leaderless Algorithms}
+\section{Leaderless Generalized Consensus Algorithms}
 
 %\todo{Let's base everything on C-Structs; it will be easier. We can say that two commands commute when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $ for every cstruct $\sigma$.} 
 
@@ -45,7 +45,7 @@ In the next sections we present our specification of leaderless generalized cons
 \subsection{Computing Dependency-Sets}
 \label{dep-algo}
 
-A dependency-set algorithm exposes the input interface $\texttt{announce}_p\left( c \right)$, where $c$ is a command, and the output interface $\texttt{suggest}_p \left( c,\mathcal{D}\right)$, where $p\in P$ is the process executing the call.  
+A dependency-set algorithm exposes the input interface $\texttt{announce}_p\left( c \right)$, to announce a command $c$, and the output interface $\texttt{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, where $p\in P$ is the process executing the call.  
 Moreover, a dependency-set algorithm must ensure that:
 \begin{enumerate}[noitemsep,nolistsep]
     \item For any suggestion $\texttt{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before.
@@ -66,12 +66,22 @@ Moreover, a dependency-set algorithm must ensure that:
 \subsection{Agreeing on Dependency Sets}
 \label{map-algo}
 
-A map-agreement algorithm exposes the input actions ${propose\left( c, d \right)}^p$ and the output actions ${decide\left( c, d \right)}^p$, for a command $c$, a set of commands $d$, and a process $p$.
+A map-agreement algorithm exposes the input interface $\texttt{propose}_p\left( c, \mathcal{D} \right)$, to propose a set of dependencies $\mathcal{D}$ for a command $c$, and the output interface $\texttt{decide}_p\left( c, \mathcal{D} \right)$, to decide $\mathcal{D}$ for $c$, where $p\in P$ is the process executing the call.
 Moreover, a map-agreement algorithm must ensure that: 
 \begin{enumerate}[noitemsep,nolistsep]
-    \item If the set of dependencies $d$ is decided for a command $c$, then $d$ has been proposed for $c$ at an earlier time.
-    \item If $d_1$ is decided for a command $c$ and $d_2$ is decided for the same command $c$, then $d_1$ is equal to $d_2$.
+    \item If the set of dependencies $\mathcal{D}$ is decided for a command $c$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
+    \item If $\mathcal{D}_1$ is decided for a command $c$ and $\mathcal{D}_2$ is decided for the same command $c$, then $\mathcal{D}_1$ is equal to $\mathcal{D}_2$.
+ \end{enumerate}
+
+\todo{OR MORE FORMALLY}
+
+\begin{enumerate}[noitemsep,nolistsep]
+    \item For any decision $\texttt{decide}_p\left( c, \mathcal{D} \right)$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
+    \item For any two decisions $\texttt{decide}_p\left( c, \mathcal{D}_1 \right)$, $\texttt{decide}_q\left( c, \mathcal{D}_2 \right)$ (with $p$ possibly equal to $q$), then $\mathcal{D}_1$ is equal to $\mathcal{D}_2$.
+
+
 \end{enumerate}
+
 Note that any SMR algorithm, like MultiPaxos, can be used to implementing map-agreement by uniquely associating commands to MultiPaxos instance numbers.
 
 \subsection{Implementing Leaderless Generalized Consensus}
