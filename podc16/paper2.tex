@@ -49,7 +49,7 @@ A dependency-set algorithm exposes the input interface $\texttt{announce}_p\left
 Moreover, a dependency-set algorithm must ensure that:
 \begin{enumerate}[noitemsep,nolistsep]
     \item For any suggestion $\texttt{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before.
-    \item For any two suggestions $\texttt{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\texttt{suggest}_q \left( c_2,\mathcal{D}_2\right)$ (with $p$ possibly equal to $q$),  if $c_1$ and $c_2$ do not commute then either $c_1\in d_2$ or $c_2 \in d_1$.
+    \item For any two suggestions $\texttt{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\texttt{suggest}_q \left( c_2,\mathcal{D}_2\right)$ (with $p$ possibly equal to $q$),  if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
 \end{enumerate}
 
 %\todo{Plain english version below. Which is better?}
