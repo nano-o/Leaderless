@@ -44,20 +44,31 @@ We also consider a symmetric relation $R \subseteq C\times C$, called \textit{de
 
 A dependency-set computation algorithm allows processes to announce a command $c$ and to learn about a suggested dependency set for a previously announced command.
 
-A dependency-set computation algorithm exposes the input actions ${\operatorname{announce}\left( c \right)}^p$, where $c$ is a command, and the output actions ${suggest\left( c, deps \right)}^p$, where $c$ is a command and $deps$ is a set of commands.
+A dependency-set computation algorithm exposes the input actions ${\operatorname{announce}\left( c \right)}^p$, where $c$ is a command, and the output actions ${suggest\left( c, d \right)}^p$, where $c$ is a command and $d$ is a set of commands.
 Moreover, a dependency-set computation algorithm must ensure that:
-\begin{itemize}[noitemsep,nolistsep]
-    \item For any suggestion ${suggest\left( c, deps \right)}^p$, every command in $\{c\}\cup deps$ must have been announced before.
-    \item For any two suggestions $suggest\left( c_1, deps_1 \right)^p$ and $suggest\left( c_2, deps_2 \right)^p$,  if $c_1$ and $c_2$ do not commute (i.e., $\left( c_1,c_2 \right) \in R$) then either $c_1\in deps_2$ or $c_2 \in deps_1$.
-\end{itemize}
+\begin{enumerate}[noitemsep,nolistsep]
+    \item For any suggestion ${suggest\left( c, d \right)}^p$, every command in $\{c\}\cup d$ must have been announced before.
+    \item For any two suggestions ${suggest\left( c_1, d_1 \right)}^p$ and ${suggest\left( c_2, d_2 \right)}^p$,  if $c_1$ and $c_2$ do not commute (i.e., $\left( c_1,c_2 \right) \in R$) then either $c_1\in d_2$ or $c_2 \in d_1$.
+\end{enumerate}
+
+\todo{Plain english version below. Which is better?}
+
+A dependency-set computation algorithm allows processes to announce a command $c$ and to learn about a suggested dependency set for a previously announced command.
+Moreover, a dependency-set computation algorithm must ensure that:
+\begin{enumerate}[noitemsep,nolistsep]
+    \item If the dependency set $d$ has been suggested for $c$, then every command in $\aset{c}\cup d$ must have been announced before.
+    \item If the dependency set $d_1$ has been suggested for the command $c_1$, the dependency set $d_2$ has been suggested for the command $c_2$, and $c_1$ and $c_2$ do not commute, then either $c_1\in d_2$ or $c_2 \in d_1$.
+\end{enumerate}
 
 \subsection{Agreeing on Dependency Sets}
 
-A map-agreement algorithm exposes the input actions $propose\left( c, deps \right)^p$ and the output actions $decide\left( c, deps \right)^p$, for a command $c$, a set of commands $deps$, and a process $p$.
-Moreover, a map-agreement algorithm must ensure that 
-\begin{itemize}[noitemsep,nolistsep]
-    \item test
-\end{itemize}
+A map-agreement algorithm exposes the input actions ${propose\left( c, d \right)}^p$ and the output actions ${decide\left( c, d \right)}^p$, for a command $c$, a set of commands $d$, and a process $p$.
+Moreover, a map-agreement algorithm must ensure that: 
+\begin{enumerate}[noitemsep,nolistsep]
+    \item If the set of dependencies $d$ is decided for a command $c$, then $d$ has been proposed for $c$ at an earlier time.
+    \item If $d_1$ is decided for a command $c$ and $d_2$ is decided for the same command $c$, then $d_1$ is equal to $d_2$.
+\end{enumerate}
+Note that any SMR algorithm, like MultiPaxos, can be used to implementing map-agreement by uniquely associating commands to MultiPaxos instance numbers.
 
 \printbibliography%
 
