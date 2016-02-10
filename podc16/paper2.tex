@@ -29,7 +29,7 @@ We expect that these two tunable knobs will allow a principled theoretical and e
 
 \section{Leaderless Algorithms}
 
-\todo{Let's base everything on C-Structs; it will be easier. We can say that two commands commute when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $ for every cstruct $\sigma$.} 
+%\todo{Let's base everything on C-Structs; it will be easier. We can say that two commands commute when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $ for every cstruct $\sigma$.} 
 
 
 We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{lamport-generalized}. Each process receives proposals for commands of the form \texttt{Propose}$(c)$, and it produces responses of the form \texttt{Decide}$(\sigma)$, where $\sigma$ is a c-struct. A c-struct set is a set, containing the element $\bot$, with an append operator $\bullet$ such that $\sigma \bullet c$ is a c-struct, for any c-struct $\sigma$ and command $c$. We say that two commands \textit{commute} when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands (see~\cite{lamport-generalized} for a complete discussion on c-struct). In the rest of the paper, unless otherwise specified, the symbol $c$, possibly sub-scripted, ranges over commands, and the symbol $\mathcal{D}$, possibly sub-scripted, ranges over sets of commands.
@@ -44,20 +44,20 @@ In the next sections we present our specification of leaderless generalized cons
 \label{dep-algo}
 
 A dependency-set algorithm exposes the input interface $\texttt{announce}_p\left( c \right)$, where $c$ is a command, and the output interface $\texttt{suggest}_p \left( c,\mathcal{D}\right)$, where $p\in P$ is the process executing the call.  
-Moreover, a dependency-set computation algorithm must ensure that:
+Moreover, a dependency-set algorithm must ensure that:
 \begin{enumerate}[noitemsep,nolistsep]
-    \item For any suggestion ${suggest\left( c, d \right)}^p$, every command in $\{c\}\cup d$ must have been announced before.
-    \item For any two suggestions ${suggest\left( c_1, d_1 \right)}^p$ and ${suggest\left( c_2, d_2 \right)}^p$,  if $c_1$ and $c_2$ do not commute (i.e., $\left( c_1,c_2 \right) \in R$) then either $c_1\in d_2$ or $c_2 \in d_1$.
+    \item For any suggestion $\texttt{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before.
+    \item For any two suggestions $\texttt{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\texttt{suggest}_q \left( c_2,\mathcal{D}_2\right)$ (with $p$ possibly equal to $q$),  if $c_1$ and $c_2$ do not commute then either $c_1\in d_2$ or $c_2 \in d_1$.
 \end{enumerate}
 
-\todo{Plain english version below. Which is better?}
+%\todo{Plain english version below. Which is better?}
 
-A dependency-set computation algorithm allows processes to announce a command $c$ and to learn about a suggested dependency set for a previously announced command.
-Moreover, a dependency-set computation algorithm must ensure that:
-\begin{enumerate}[noitemsep,nolistsep]
-    \item If the dependency set $d$ has been suggested for $c$, then every command in $\aset{c}\cup d$ must have been announced before.
-    \item If the dependency set $d_1$ has been suggested for the command $c_1$, the dependency set $d_2$ has been suggested for the command $c_2$, and $c_1$ and $c_2$ do not commute, then either $c_1\in d_2$ or $c_2 \in d_1$.
-\end{enumerate}
+%A dependency-set computation algorithm allows processes to announce a command $c$ and to learn about a suggested dependency set for a previously announced command.
+%Moreover, a dependency-set computation algorithm must ensure that:
+%\begin{enumerate}[noitemsep,nolistsep]
+  %  \item If the dependency set $d$ has been suggested for $c$, then every command in $\aset{c}\cup d$ must have been announced before.
+  %  \item If the dependency set $d_1$ has been suggested for the command $c_1$, the dependency set $d_2$ has been suggested for the command $c_2$, and $c_1$ and $c_2$ do not commute, then either $c_1\in d_2$ or $c_2 \in d_1$.
+%\end{enumerate}
 
 \todo{``Suggest'' can also be used to trigger recovery}.
 
