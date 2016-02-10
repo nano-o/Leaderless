@@ -41,7 +41,7 @@ A dependency-set computation algorithm exposes the input actions ${\operatorname
 Moreover, a dependency-set computation algorithm must ensure that:
 \begin{itemize}[noitemsep,nolistsep]
     \item For any suggestion ${suggest\left( c, deps \right)}$, every command in $c\cup deps$ must have been announced before.
-    \item for any two suggestions $suggest\left( c_1, deps_1 \right)$ and $suggest\left( c_2, deps_2 \right)$,  if $c_1$ and $c_2$ do not commute then either $c_1\in deps_2$ or $c_2 \in deps_1$.
+    \item for any two suggestions $suggest\left( c_1, deps_1 \right)$ and $suggest\left( c_2, deps_2 \right)$,  if $c_1$ and $c_2$ do not commute ($\left( c_1,c_2 \right) \in R$) then either $c_1\in deps_2$ or $c_2 \in deps_1$.
 \end{itemize}
 
 \subsection{Agreeing on Dependency Sets}
