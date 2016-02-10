@@ -1,0 +1,42 @@
+\documentclass[11]{article}
+\usepackage[english]{babel}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{comment}
+\hypersetup{pdftex,colorlinks=true,allcolors=blue}
+\usepackage{enumitem}
+\usepackage{hypcap}
+\usepackage[url=true,doi=false,isbn=false,backend=biber]{biblatex}
+\addbibresource{managed.bib}
+
+%\setcounter{tocdepth}{2}
+%\usepackage{pdfpages}
+%\usepackage{wrapfig}
+%\makeatletter
+%\newcommand{\setword}[2]{%
+%    \phantomsection%
+%    #1\def\@currentlabel{\unexpanded{#1}}\label{#2}%
+%}
+%\makeatother
+
+\newcommand{\todo}[1]{\ifdraft{\textcolor{red}{TODO\@: #1}}{}}
+
+\DeclarePairedDelimiter\asetx{\{}{\}}
+\newcommand{\aset}[1]{\asetx*{#1}}
+\newcommand{\Aset}[1]{\bigl\{#1\bigr\}}
+
+\DeclarePairedDelimiter\aseqx{\langle}{\rangle}
+\newcommand{\aseq}[1]{\aseqx*{#1}}
+\newcommand{\Aseq}[1]{\big\langle#1\big\rangle}
+
+\DeclarePairedDelimiter\areqx{[}{]}
+\newcommand{\arec}[1]{\areqx{#1}}
+\newcommand{\Arec}[1]{\bigl[#1\bigr]}
+
+\newcommand{\quo}[1]{\text{``#1''}}
+
