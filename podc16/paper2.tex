@@ -55,6 +55,8 @@ Moreover, a dependency-set computation algorithm must ensure that:
     \item If the dependency set $d_1$ has been suggested for the command $c_1$, the dependency set $d_2$ has been suggested for the command $c_2$, and $c_1$ and $c_2$ do not commute, then either $c_1\in d_2$ or $c_2 \in d_1$.
 \end{enumerate}
 
+\todo{``Suggest'' can also be used to trigger recovery}.
+
 \subsection{Agreeing on Dependency Sets}
 
 A map-agreement algorithm exposes the input actions ${propose\left( c, d \right)}^p$ and the output actions ${decide\left( c, d \right)}^p$, for a command $c$, a set of commands $d$, and a process $p$.
@@ -74,6 +76,16 @@ Moreover, a generalized-consensus algorithm must ensure that TODO.
 We now propose an algorithm that uses the dependency-set computation abstraction and the map-agreement abstraction to implement generalized consensus. We therefore obtain a family of generalized consensus algorithms where each member of the family is obtained by using concrete dependency-set and map-agreement algorithms.
 
 \todo{Explain the algorithm with pseudocode?}
+Local variables: committed, a map from commands to dependency sets, initially the empty map.
+\begin{itemize}[noitemsep,nolistsep]
+    \item Upon ${propose\left( c \right)}^p$: call ${announce\left( c \right)}^p$.
+    \item Upon ${suggest\left( c,d \right)}^p$: call ${propose\left( c,d \right)}^p$.
+    \item Upon ${decide\left( c,d \right)}^p$: insert the mapping $c \rightarrow d$ in the map ``committed''.
+    \item Periodically: process the committed commands, as described below.
+\end{itemize}
+
+The variable ``committed'' of the algorithm above can be seen as describing a directed graph $g$ whose vertices are commands and such that there is an edge from $c_1$ to $c_2$ if and only if ``committed'' maps $v_1$ to a set $deps$ where $v_2\in deps$, i.e. $v_1$ depends on $v_2$.
+
 
 \todo{Explain the graph processing algo independently? Its key property is that when $G1 \subseteq G2$ then $lin\left( c_1,G1 \right)$ is a prefix of $lin\left( c_2,G2 \right)$ or vice-versa.}
 
