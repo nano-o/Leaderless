@@ -32,14 +32,18 @@ We expect that these two tunable knobs will allow a principled theoretical and e
 \todo{Let's base everything on C-Structs; it will be easier. We can say that two commands commute when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $ for every cstruct $\sigma$.} 
 
 
-We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network.
-We also consider a deterministic state-machine $M$ whose set of commands is $C$. 
-We say that two commands $c_a$, $c_b$ \textit{commute} if executing $c_a$ before $c_b$ has the same effect on the state machine as executing $c_b$ before $c_a$. We assume that a command does not commute with itself.
-We also consider a symmetric relation $R \subseteq C\times C$, called \textit{dependency relation}, such that: for any command $c$, $\left( c,c \right)\notin R$, and if $\left( c_a,c_b \right)\notin R$ then $c_a$ and $c_b$ commute. 
+We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{lamport-generalized}. Each process receives proposals for commands of the form \texttt{Propose}$(c)$, and it produces responses of the form \texttt{Decide}$(\sigma)$, where $\sigma$ is a c-struct. A c-struct set is a set, containing the element $\bot$, with an append operator $\bullet$ such that $\sigma \bullet c$ is a c-struct, for any c-struct $\sigma$ and command $c$. We say that two commands \textit{commute} when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands (see~\cite{lamport-generalized} for a complete discussion on c-struct). In the rest of the paper, unless otherwise specified, the symbol $c$, possibly sub-scripted, ranges over commands, and the symbol $\mathcal{D}$, possibly sub-scripted, ranges over sets of commands.
+
+In the next sections we present our specification of leaderless generalized consensus algorithms, which is parameterized over a \textit{dependency-set} algorithm (\Cref{dep-algo}) and a \textit{map-agreement} algorithm (\Cref{map-algo}). 
+%Processes proposals of commands to the \textit{Generalized Consensus} layer
+%We also consider a deterministic state-machine $M$ whose set of commands is $C$. 
+%We say that two commands $c_a$, $c_b$ \textit{commute} if executing $c_a$ before $c_b$ has the same effect on the state machine as executing $c_b$ before $c_a$. We assume that a command does not commute with itself.
+%We also consider a symmetric relation $R \subseteq C\times C$, called \textit{dependency relation}, such that: for any command $c$, $\left( c,c \right)\notin R$, and if $\left( c_a,c_b \right)\notin R$ then $c_a$ and $c_b$ commute. 
 
 \subsection{Computing Dependency-Sets}
+\label{dep-algo}
 
-A dependency-set computation algorithm exposes the input actions ${\operatorname{announce}\left( c \right)}^p$, where $c$ is a command, and the output actions ${suggest\left( c, d \right)}^p$, where $c$ is a command and $d$ is a set of commands.
+A dependency-set algorithm exposes the input interface $\texttt{announce}_p\left( c \right)$, where $c$ is a command, and the output interface $\texttt{suggest}_p \left( c,\mathcal{D}\right)$, where $p\in P$ is the process executing the call.  
 Moreover, a dependency-set computation algorithm must ensure that:
 \begin{enumerate}[noitemsep,nolistsep]
     \item For any suggestion ${suggest\left( c, d \right)}^p$, every command in $\{c\}\cup d$ must have been announced before.
@@ -56,6 +60,7 @@ Moreover, a dependency-set computation algorithm must ensure that:
 \end{enumerate}
 
 \subsection{Agreeing on Dependency Sets}
+\label{map-algo}
 
 A map-agreement algorithm exposes the input actions ${propose\left( c, d \right)}^p$ and the output actions ${decide\left( c, d \right)}^p$, for a command $c$, a set of commands $d$, and a process $p$.
 Moreover, a map-agreement algorithm must ensure that: 
