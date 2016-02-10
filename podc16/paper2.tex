@@ -30,8 +30,9 @@ We expect that these two tunable knobs will allow a principled theoretical and e
 \section{Leaderless Algorithms}
 
 We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network.
-We also consider a deterministic state-machine $M$ whose set of commands is $C$ and equipped with a dependency relation symmetric relation $R \subseteq C\times C$ such that for any command $c$, $\left( c,c \right)\notin R$, and if $\left( c_a,c_b \right)\in R$ then $\aseq{s_1,c_1,\cdots,s_i,c_a,s_{i+1},c_b,\cdots,s_n}$ is an execution of the state-machine $M$ if and only if
-$\aseq{s_1,c_1,\cdots,s_i,c_b,s_{i+1},c_a,\cdots,s_n}$.
+We also consider a deterministic state-machine $M$ whose set of commands is $C$. We say that two commands $c_a$, $c_b$ \textit{commute} if executing $c_a$ before $c_b$ has the same effect as executing $c_b$ before $c_a$. We also consider a symmetric relation $R \subseteq C\times C$, called \textit{dependency relation}, such that: for any command $c$, $\left( c,c \right)\notin R$;  if $\left( c_a,c_b \right)\notin R$ $c_a$, $c_b$ \textit{commute}. then $\aseq{s_1,c_1,\cdots,s_i,c_a,s_{i+1},c_b,s_{i+2}\cdots,s_n}$ is an execution of the state-machine $M$ if and only if
+%$\aseq{s_1,c_1,\cdots,s_i,c_b,s_{i+1},c_a,\cdots,s_n}$.
+%$\aseq{s_1,c_1,\cdots,s_i,c_b,s_{i+2},c_a,s_{i+1},\cdots,s_n}$
 
 \subsection{Computing Dependency-Sets}
 
@@ -40,8 +41,8 @@ A dependency-set computation algorithm allows processes to announce a command $c
 A dependency-set computation algorithm exposes the input actions ${\operatorname{announce}\left( c \right)}^p$, where $c$ is a command, and the output actions ${suggest\left( c, deps \right)}^p$, where $c$ is a command and $deps$ is a set of commands.
 Moreover, a dependency-set computation algorithm must ensure that:
 \begin{itemize}[noitemsep,nolistsep]
-    \item For any suggestion ${suggest\left( c, deps \right)}$, every command in $c\cup deps$ must have been announced before.
-    \item for any two suggestions $suggest\left( c_1, deps_1 \right)$ and $suggest\left( c_2, deps_2 \right)$,  if $c_1$ and $c_2$ do not commute ($\left( c_1,c_2 \right) \in R$) then either $c_1\in deps_2$ or $c_2 \in deps_1$.
+    \item For any suggestion ${suggest\left( c, deps \right)}^p$, every command in $\{c\}\cup deps$ must have been announced before.
+    \item For any two suggestions $suggest\left( c_1, deps_1 \right)^p$ and $suggest\left( c_2, deps_2 \right)^p$,  if $c_1$ and $c_2$ do not commute (i.e., $\left( c_1,c_2 \right) \in R$) then either $c_1\in deps_2$ or $c_2 \in deps_1$.
 \end{itemize}
 
 \subsection{Agreeing on Dependency Sets}
