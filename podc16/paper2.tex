@@ -182,18 +182,19 @@ Its main property is Lemma 1; Together with Invariants 1 and 2 (TODO, the invari
 \textbf{Local dependency graph computed by a process.} The local variable $cs_p$ of a process $p$ can be seen as describing a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the domain of $m_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ if and only both $c_1$ and $c_2$ are in $V\left( g_p \right)$ and $v_2 \in m_p\left[ v_1 \right]$ (i.e., $v_1$ depends on $v_2$). For example, if $cs_p = \left[ c_1 \mapsto \aset{c_2,c_3}, c_2 \mapsto \aset{c_1} \right]$ then $V\left(
 g_p \right) = \aset{c_1,c_2}$ and $E\left( g_p \right) = \aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right)}$.
 
-\textbf{Graph of strongly connected components.} Given a graph $g$, let $\hat{g}$ be the graph whose vertices are the strongly connected components of $g$ (represented as sets of vertices) and where there is an edge from $g_1$ to $g_2$ if and only if there are two vertices $v_1$ and $v_2$ of $g$ such that $v_1 \in V\left( g_1 \right)$, $v_2 \in V\left( g_2 \right)$, and $\left( v_1,v_2 \right)\in E\left( g \right)$. Note that the reflexive and transitive closure of $V\left(  \hat{g} \right)$ is necessarily a partial order. For example, if $V\left( g
-\right)=\aset{c_1,c_2,c_3,c_4}$
-and $E\left( g \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right),\left( c_1,c_3 \right)}$ then $V\left(\hat{g}\right) = \aset{\aset{c_1,c_2},\aset{c_3},\aset{c_4}}$ and $E\left( \hat{g} \right)=\aset{\left( \aset{c_1,c_2},\aset{c_3} \right)}$.
+\textbf{Graph of strongly connected components.} Given a graph $g$, let $\hat{g}$ be the graph whose vertices are the strongly connected components of $g$ (represented as sets of vertices) and where there is an edge from $g_1$ to $g_2$ if and only if there are two vertices $v_1$ and $v_2$ of $g$ such that $v_1 \in V\left( g_1 \right)$, $v_2 \in V\left( g_2 \right)$, and $\left( v_1,v_2 \right)\in E\left( g \right)$. Note that the reflexive and transitive closure of $V\left(  \hat{g} \right)$ is necessarily a partial order. 
+For example, if $V\left( g \right)=\aset{c_1,c_2,c_3,c_4}$ and $E\left( g \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right),\left( c_1,c_3 \right)}$ then $V\left(\hat{g}\right) = \aset{\aset{c_1,c_2},\aset{c_3},\aset{c_4}}$ and $E\left( \hat{g} \right)=\aset{\left( \aset{c_1,c_2},\aset{c_3} \right)}$.
 
 \textbf{Orders induced by a graph.} A directed graph $g$ induces a partial order $\preceq_g$ on its vertices defined such that $v_1 \preceq_g v_2$ iff there is a path from $v_1$ to $v_2$ and there is no path from $v_2$ to $v_1$.
 Let $\opn{TOs}\left( g \right)$ be the set of total orders $o$ such that $\preceq_g \subseteq o$.
+For example, if $V\left( g \right)=\aset{c_1,c_2,c_3,c_4}$ and $E\left( g \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right),\left( c_1,c_3 \right)}$, then $\preceq_g = \aset{\left( c_1,c_3 \right)}$ and $\opn{TOs}\left( g \right)$ is the set of all permutations of $\aseq{c_1,c_2,c_3,c_4}$ in which $c_1$ comes before $c_3$.
 
 \textbf{Linearization function.} Consider a function $f$ mapping sets of commands to sequences of commands such that $f\left[ cs \right]$ is a total order on the set $cs$.
 
 \textbf{Linearizations of a dependency graph.}
 When $\hat{o}$ is a total order over the strongly connected components of $g$ such that $\hat{o} \in \opn{TOs}\left( \hat{g} \right)$, we say that a total order $l$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when $\left(v_1,v_2\right) \in l$ iff (1) there exists $vs_1,vs_2\in V\left(\hat{g}\right)$ such that $v_1\in vs_1$, $v_2\in vs_2$, and $\left( vs_1,vs_2 \right)\in \hat{o}$, or (2) there exists $vs_1\in V\left(\hat{g}\right)$ such that
 $v_1,v_2\in  vs_1$ and $\left( v_1,v_2 \right)\in f\left[  vs_1 \right]$.
+For example, if $V\left( g \right)=\aset{c_1,c_2,c_3,c_4}$ and $E\left( g \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right),\left( c_1,c_3 \right)}$ and $f\left[ \set{c_1,c_2} \right] = \aseq{c_2,c_1}$ then $\aseq{c_2,c_1,c_3,c_4}$ is a linearization of $g$ but $\aseq{c_1,c_2,c_3,c_4}$ is not and neither is $\aseq{c_3,c_2,c_1,c_4}$
 
 \textbf{Lemma 1}: 
 Assume that: $g_1$ and $g_2$ are two dependency graphs; 
