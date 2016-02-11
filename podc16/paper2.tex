@@ -165,18 +165,18 @@ We now propose an algorithm that uses the dependency-set computation abstraction
 
 \todo{Explain the algorithm with pseudocode?}
 
-Local variables: $\opn{cs}_p$, a map from commands to dependency sets, initially the empty map.
+Local variables: $m_p$, a map from commands to dependency sets, initially the empty map; $\sigma_p$, a c-struct, initially $\bot$.
 \begin{itemize}[noitemsep,nolistsep]
     \item Upon ${\opn{propose}\left( c \right)}^p$: call ${\opn{announce}\left( c \right)}^p$.
     \item Upon ${\opn{suggest}\left( c,d \right)}^p$: call ${\opn{propose}\left( c,d \right)}^p$.
-    \item Upon ${\opn{decide}\left( c,d \right)}^p$: insert the mapping $c \rightarrow d$ in the map $\opn{cs}_p$.
-    \item Periodically,  every process $p$ processes $\opn{cs}_p$, as described below.
+    \item Upon ${\opn{decide}\left( c,d \right)}^p$: insert the mapping $c \rightarrow d$ in the map $m_p$.
+    \item Periodically, update $\sigma_p$ to $\opn{c-struct}\left( m_p \right)$, where $\opn{c-struct}\left( m_p \right)$ is defined below.
 \end{itemize}
 
 \subsection{Graph Processing}
 \label{graph-proc}
 
-\textbf{Local dependency graph computed by a process.} The local variable $cs_p$ of a process $p$ can be seen as describing a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the domain of $\opn{cs}_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ if and only both $c_1$ and $c_2$ are in $V\left( g_p \right)$ and $v_2 \in \opn{cs}_p\left[ v_1 \right]$ (i.e., $v_1$ depends on $v_2$). For example, if $cs_p = \left[ c_1 \mapsto \aset{c_2,c_3}, c_2 \mapsto \aset{c_1} \right]$ then $V\left(
+\textbf{Local dependency graph computed by a process.} The local variable $cs_p$ of a process $p$ can be seen as describing a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the domain of $m_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ if and only both $c_1$ and $c_2$ are in $V\left( g_p \right)$ and $v_2 \in m_p\left[ v_1 \right]$ (i.e., $v_1$ depends on $v_2$). For example, if $cs_p = \left[ c_1 \mapsto \aset{c_2,c_3}, c_2 \mapsto \aset{c_1} \right]$ then $V\left(
 g_p \right) = \aset{c_1,c_2}$ and $E\left( g_p \right) = \aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right)}$.
 
 \textbf{Graph of strongly connected components.} Given a graph $g$, let $\hat{g}$ be the graph whose vertices are the strongly connected components of $g$ (represented as sets of vertices) and where there is an edge from $g_1$ to $g_2$ if and only if there are two vertices $v_1$ and $v_2$ of $g$ such that $v_1 \in V\left( g_1 \right)$, $v_2 \in V\left( g_2 \right)$, and $\left( v_1,v_2 \right)\in E\left( g \right)$. Note that the reflexive and transitive closure of $V\left(  \hat{g} \right)$ is necessarily a partial order. For example, if $V\left( g
@@ -189,17 +189,20 @@ Let $\opn{TOs}\left( g \right)$ be the set of total orders $o$ such that $\prece
 \textbf{Linearization function.} Consider a function $f$ mapping sets of commands to sequences of commands such that $f\left[ cs \right]$ is a total order on the set $cs$.
 
 \textbf{Linearizations of a dependency graph.}
-When $\hat{o}$ is a total order over the strongly connected components of $g$ such that $\hat{o} \in \opn{TOs}\left( \hat{g} \right)$, define the total order $l\left(\hat{o},g\right)$ on $V\left( g \right)$ such that $\left(v_1,v_2\right) \in l\left(\hat{o},g\right)$ iff (1) there exists $vs_1,vs_2\in V\left(\hat{g}\right)$ such that $v_1\in vs_1$, $v_2\in vs_2$, and $\left( vs_1,vs_2 \right)\in \hat{o}$, or (2) there exists $vs_1\in V\left(\hat{g}\right)$ such that
+When $\hat{o}$ is a total order over the strongly connected components of $g$ such that $\hat{o} \in \opn{TOs}\left( \hat{g} \right)$, we say that a total order $l$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when $\left(v_1,v_2\right) \in l$ iff (1) there exists $vs_1,vs_2\in V\left(\hat{g}\right)$ such that $v_1\in vs_1$, $v_2\in vs_2$, and $\left( vs_1,vs_2 \right)\in \hat{o}$, or (2) there exists $vs_1\in V\left(\hat{g}\right)$ such that
 $v_1,v_2\in  vs_1$ and $\left( v_1,v_2 \right)\in f\left[  vs_1 \right]$.
-We say that $l\left(\hat{o},g\right)$ is a \emph{linearization} of $g$.
 
-\textbf{Lemma}: 
+\textbf{Lemma 1}: 
 Assume that: $g_1$ and $g_2$ are two dependency graphs; 
 for every pair of non-commutative commands $c_1,c_2 \in V\left(g_2\right)$, either $\left( c_1,c_2 \right)\in E\left( g_2 \right)$ or $\left( c_2,c_1 \right)\in E\left( g_2 \right)$;
 $V\left( \hat{g_1} \right)\subseteq V\left( \hat{g_2} \right)$; 
 $E\left( \hat{g_1} \right)\subseteq E\left( \hat{g_2} \right)$; 
 $l_1$ is a linearization of $g_1$ and $l_2$ is a linearization of $g_2$. 
-Then, $\bot\bullet l1 \preceq \bot\bullet l2$.
+Then we have (a), $\bot\bullet l1 \preceq \bot\bullet l2$, and (b), if $g_1 = g_2$ then $\bot\bullet l1 = \bot\bullet l2$.
+
+\textbf{Definition of $\opn{c-struct}\left( m_p \right)$}.
+We define $\opn{c-struct}\left( m_p \right) = \bot\bullet l$ where $l$ is a linearization of $g_p$.
+By lemma 1.b, $\opn{c-struct}\left( m_p \right)$ is well-defined.
 
 \begin{comment}
 Define $\opn{Lin}_g\left( \leq \right) = f\left[ V_1 \right] \cdot F\left[ V_2 \right] \cdot F\left[ V_n \right]$, where $V_i\in V\left( \hat{g} \right)$ 
