@@ -196,13 +196,15 @@ When $\hat{o}$ is a total order over the strongly connected components of $g$ su
 $v_1,v_2\in  vs_1$ and $\left( v_1,v_2 \right)\in f\left[  vs_1 \right]$.
 For example, if $V\left( g \right)=\aset{c_1,c_2,c_3,c_4}$ and $E\left( g \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right),\left( c_1,c_3 \right)}$ and $f\left[ \set{c_1,c_2} \right] = \aseq{c_2,c_1}$ then $\aseq{c_2,c_1,c_3,c_4}$ is a linearization of $g$ but $\aseq{c_1,c_2,c_3,c_4}$ is not and neither is $\aseq{c_3,c_2,c_1,c_4}$
 
-\textbf{Lemma 1}: 
+\textbf{Partial order on graphs.}
+If $g_1$ and $g_2$ are two graphs, then we write $g_1 \leq g_2$ iff $V\left( g_1 \right)\subseteq V\left( g_2 \right)$, and if $v\in V\left( g_1 \right)$, $e\in E\left( g_2 \right)$, and $v$ is an endpoint of $e$, then $e\in E\left( g_1 \right)$. 
+
+\textbf{Lemma 1}:
 Assume that: $g_1$ and $g_2$ are two dependency graphs; 
 for every pair of non-commutative commands $c_1,c_2 \in V\left(g_2\right)$, either $\left( c_1,c_2 \right)\in E\left( g_2 \right)$ or $\left( c_2,c_1 \right)\in E\left( g_2 \right)$;
-$V\left( \hat{g_1} \right)\subseteq V\left( \hat{g_2} \right)$; 
-$E\left( \hat{g_1} \right)\subseteq E\left( \hat{g_2} \right)$; 
+$g_1 \leq g_2$;
 $l_1$ is a linearization of $g_1$ and $l_2$ is a linearization of $g_2$. 
-Then we have (a), $\bot\bullet l1 \preceq \bot\bullet l2$, and (b), if $g_1 = g_2$ then $\bot\bullet l1 = \bot\bullet l2$.
+Then we have (a), $\bot\bullet l_1 \preceq \bot\bullet l_2$, and (b), if $g_1 = g_2$ then $\bot\bullet l_1 = \bot\bullet l_2$.
 
 \textbf{Definition of $\opn{c-struct}\left( m_p \right)$}.
 We define $\opn{c-struct}\left( m_p \right) = \bot\bullet l$ where $l$ is a linearization of $g_p$.
