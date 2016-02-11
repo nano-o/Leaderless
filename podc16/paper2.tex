@@ -34,7 +34,7 @@ We expect that these two tunable knobs will allow a principled theoretical and e
 %\todo{Let's base everything on C-Structs; it will be easier. We can say that two commands commute when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $ for every cstruct $\sigma$.} 
 
 
-We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}. Each process receives proposals for commands of the form $\operatorname{Propose}(c)$, and it produces responses of the form $\operatorname{Decide}(\sigma)$, where $\sigma$ is a c-struct. A c-struct set is a set, containing the element $\bot$, with an append operator
+We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}. Each process receives proposals for commands of the form $\opn{Propose}(c)$, and it produces responses of the form $\opn{Decide}(\sigma)$, where $\sigma$ is a c-struct. A c-struct set is a set, containing the element $\bot$, with an append operator
 $\bullet$ such that $\sigma \bullet c$ is a c-struct, for any c-struct $\sigma$ and command $c$. We say that two commands \textit{commute} when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands (see~\cite{Lamport05GeneralizeConsensus} for a complete discussion on c-struct). In the rest of the paper, unless otherwise specified, the symbol $c$, possibly sub-scripted, ranges over commands, and the symbol $\mathcal{D}$, possibly sub-scripted, ranges over sets of commands.
 
 In the next sections we present our specification of leaderless generalized consensus algorithms, which is parameterized over a \textit{dependency-set} algorithm (\Cref{dep-algo}) and a \textit{map-agreement} algorithm (\Cref{map-algo}). 
@@ -46,11 +46,11 @@ In the next sections we present our specification of leaderless generalized cons
 \subsection{Computing Dependency-Sets}
 \label{dep-algo}
 
-A dependency-set algorithm exposes the input interface $\operatorname{announce}_p\left( c \right)$, to announce a command $c$, and the output interface $\operatorname{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, where $p\in P$ is the process executing the call.  
+A dependency-set algorithm exposes the input interface $\opn{announce}_p\left( c \right)$, to announce a command $c$, and the output interface $\opn{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, where $p\in P$ is the process executing the call.  
 Moreover, a dependency-set algorithm must ensure that:
 \begin{enumerate}[noitemsep,nolistsep]
-    \item For any suggestion $\operatorname{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before.
-    \item For any two suggestions $\operatorname{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\operatorname{suggest}_q \left( c_2,\mathcal{D}_2\right)$ (with $p$ possibly equal to $q$),  if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
+    \item For any suggestion $\opn{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before.
+    \item For any two suggestions $\opn{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\opn{suggest}_q \left( c_2,\mathcal{D}_2\right)$ (with $p$ possibly equal to $q$),  if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
 \end{enumerate}
 
 %\todo{Plain english version below. Which is better?}
@@ -67,7 +67,7 @@ Moreover, a dependency-set algorithm must ensure that:
 \subsection{Agreeing on Dependency Sets}
 \label{map-algo}
 
-A map-agreement algorithm exposes the input interface $\operatorname{propose}_p\left( c, \mathcal{D} \right)$, to propose a set of dependencies $\mathcal{D}$ for a command $c$, and the output interface $\operatorname{decide}_p\left( c, \mathcal{D} \right)$, to decide $\mathcal{D}$ for $c$, where $p\in P$ is the process executing the call.
+A map-agreement algorithm exposes the input interface $\opn{propose}_p\left( c, \mathcal{D} \right)$, to propose a set of dependencies $\mathcal{D}$ for a command $c$, and the output interface $\opn{decide}_p\left( c, \mathcal{D} \right)$, to decide $\mathcal{D}$ for $c$, where $p\in P$ is the process executing the call.
 Moreover, a map-agreement algorithm must ensure that: 
 \begin{enumerate}[noitemsep,nolistsep]
     \item If the set of dependencies $\mathcal{D}$ is decided for a command $c$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
@@ -77,8 +77,8 @@ Moreover, a map-agreement algorithm must ensure that:
 \todo{OR MORE FORMALLY}
 
 \begin{enumerate}[noitemsep,nolistsep]
-    \item For any decision $\operatorname{decide}_p\left( c, \mathcal{D} \right)$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
-    \item For any two decisions $\operatorname{decide}_p\left( c, \mathcal{D}_1 \right)$, $\operatorname{decide}_q\left( c, \mathcal{D}_2 \right)$ (with $p$ possibly equal to $q$), then $\mathcal{D}_1$ is equal to $\mathcal{D}_2$.
+    \item For any decision $\opn{decide}_p\left( c, \mathcal{D} \right)$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
+    \item For any two decisions $\opn{decide}_p\left( c, \mathcal{D}_1 \right)$, $\opn{decide}_q\left( c, \mathcal{D}_2 \right)$ (with $p$ possibly equal to $q$), then $\mathcal{D}_1$ is equal to $\mathcal{D}_2$.
 
 
 \end{enumerate}
@@ -95,19 +95,28 @@ We now propose an algorithm that uses the dependency-set computation abstraction
 
 \todo{Explain the algorithm with pseudocode?}
 
-Local variables: $\operatorname{committed}_p$, a map from commands to dependency sets, initially the empty map.
+Local variables: $\opn{cs}_p$, a map from commands to dependency sets, initially the empty map.
 \begin{itemize}[noitemsep,nolistsep]
-    \item Upon ${\operatorname{propose}\left( c \right)}^p$: call ${\operatorname{announce}\left( c \right)}^p$.
-    \item Upon ${\operatorname{suggest}\left( c,d \right)}^p$: call ${\operatorname{propose}\left( c,d \right)}^p$.
-    \item Upon ${\operatorname{decide}\left( c,d \right)}^p$: insert the mapping $c \rightarrow d$ in the map $\operatorname{committed}_p$.
-    \item Periodically,  every process $p$ processes $\operatorname{committed}_p$, as described below.
+    \item Upon ${\opn{propose}\left( c \right)}^p$: call ${\opn{announce}\left( c \right)}^p$.
+    \item Upon ${\opn{suggest}\left( c,d \right)}^p$: call ${\opn{propose}\left( c,d \right)}^p$.
+    \item Upon ${\opn{decide}\left( c,d \right)}^p$: insert the mapping $c \rightarrow d$ in the map $\opn{cs}_p$.
+    \item Periodically,  every process $p$ processes $\opn{cs}_p$, as described below.
 \end{itemize}
 
-The local variable $committed_p$ of a process $p$ can be seen as describing a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the domain of $\operatorname{commited}_p$ and such that there is an edge from $c_1$ to $c_2$ if and only both are in $V\left( g_p \right)$ and $v_2 \in \operatorname{commited}_p\left[ v_1 \right]$ (i.e., $v_1$ depends on $v_2$).
-%Let us assume that 
+The local variable $cs_p$ of a process $p$ can be seen as describing a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the domain of $\opn{cs}_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ if and only both $c_1$ and $c_2$ are in $V\left( g_p \right)$ and $v_2 \in \opn{cs}_p\left[ v_1 \right]$ (i.e., $v_1$ depends on $v_2$). For example, if $cs_p = \left[ c_1 \mapsto \aset{c_2,c_3}, c_2 \mapsto \aset{c_1} \right]$ then $V\left(
+g_p \right) = \aset{c_1,c_2}$ and $E\left( g_p \right) = \aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right)}$.
+Given a graph $g$, let $\opn{sccs}\left( g \right)$ be the graph whose vertices are the strongly connected components of $g$ and where there is an edge from $scc_1$ to $scc_2$ if and only if there are two vertices $v_1$ and $v_2$ of $g$ such that $v_1 \in V\left( scc_1 \right)$, $v_2 \in V\left( scc_2 \right)$, and $\left( v_1,v_2 \right)\in E\left( g \right)$. Note that $\opn{sccs}\left( g \right)$ is necessarily a forest.
 
+Define the set of linearizations $\opn{Lins}\left( g \right)$ of a graph $g$ a the set of sequences whose length is the cardinality of $V\left( g \right)$, which contain each element of $V\left( g \right)$ exactly once, and ... \todo{or first define the partial order induced by a graph and then its compatible total orders.}
+
+Consider a function $f$ mapping sets of commands to sequences of commands such that $f\left[ cs \right]$ contains each command in $cs$ exactly once.
+A sequence of commands $cseq$ is an $f$-linearization of the graph $g$ if and only there is a sequence whose element of strongly connected 
 
 \todo{Explain the graph processing algo independently? Its key property is that when $G1 \subseteq G2$ then $lin\left( c_1,G1 \right)$ is a prefix of $lin\left( c_2,G2 \right)$ or vice-versa.}
+
+\subsection{Correctenss Proof}
+
+\subsection{Obtaining EPaxos}
 
 \printbibliography%
 
