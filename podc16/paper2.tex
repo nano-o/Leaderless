@@ -204,17 +204,17 @@ We assume that processes initially agree, for each set of commands $cs$, on a to
 In practice, if commands are attached a unique identifier among a totally ordered set, $<_{cs}$ can be the restriction of this total order on $cs$.
 
 %\textbf{Local dependency graph computed by a process.} 
-The local variable $cs_p$ of a process $p$ can be seen as describing a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the domain of $m_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ if and only both $c_1$ and $c_2$ are in $V\left( g_p \right)$ and $v_2 \in m_p\left[ v_1 \right]$ (i.e., $v_1$ depends on $v_2$). For example, if $cs_p = \left[ c_1 \mapsto \aset{c_2,c_3}, c_2 \mapsto \aset{c_1} \right]$ then $V\left(
+The local variable $cs_p$ of a process $p$ can be seen as describing a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the domain of $m_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ if and only both $c_1$ and $c_2$ are in $V\left( g_p \right)$ and $c_2 \in m_p\left[ c_1 \right]$ (i.e., $c_1$ depends on $c_2$). For example, if $cs_p = \left[ c_1 \mapsto \aset{c_2,c_3}, c_2 \mapsto \aset{c_1} \right]$ then $V\left(
 g_p \right) = \aset{c_1,c_2}$ and $E\left( g_p \right) = \aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right)}$.
 
 %\textbf{Orders induced by a graph.}
-A directed graph $g$ \emph{induces a partial order} $\preceq_g$ on its vertices defined such that $v_1 \preceq_g v_2$ iff there is a path from $v_1$ to $v_2$ and there is no path from $v_2$ to $v_1$.
+A directed graph $g$ \emph{induces a partial order} $\preceq_g$ on its vertices defined such that $c_1 \preceq_g c_2$ iff there is a path from $c_1$ to $c_2$ and there is no path from $c_2$ to $c_1$.
 %Let $\opn{TOs}\left( g \right)$ be the set of total orders $o$ such that $\preceq_g \subseteq o$.
 For example, $\preceq_h = \aset{\left( c_1,c_3 \right)}$. % and $\opn{TOs}\left( h \right)$ is the set of all permutations of $\aseq{c_1,c_2,c_3,c_4}$ in which $c_1$ comes before $c_3$.
 %\textbf{Equivalence relation induced by a graph.}
-A directed graph $g$ \emph{induces an equivalence relation} $\sim_g$ on its vertices defined such that $v_1 \sim_g v_2$ iff $v_1$ and $v_2$ belong to the same strongly connected component. We write $\left[ v \right]_g$ for the equivalence class of $v$ under $\sim_g$.
+A directed graph $g$ \emph{induces an equivalence relation} $\sim_g$ on its vertices defined such that $c_1 \sim_g c_2$ iff $c_1$ and $c_2$ belong to the same strongly connected component. We write $\left[ v \right]_g$ for the equivalence class of $v$ under $\sim_g$.
 %\textbf{Linearizations of a dependency graph.}
-We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every pair of vertices $v_1,v_2\in V\left( g \right)$, $v_1 \preceq_g v_2$ implies $v_1 \ll v_2$, and if $v_1 \sim_g v_2$ and $ v_1 <_{\left[ v_1 \right]_g} v_2$ hold then $v_1 \ll v_2$.
+We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every pair of vertices $c_1,c_2\in V\left( g \right)$, $c_1 \preceq_g c_2$ implies $c_1 \ll c_2$, and if $c_1 \sim_g c_2$ and $ c_1 <_{\left[ c_1 \right]_g} c_2$ hold then $c_1 \ll c_2$.
 %\textbf{Partial order on graphs.}
 
 We now define a partial order on graphs. If $g_1$ and $g_2$ are two graphs, then we write $g_1 \leq g_2$ iff $V\left( g_1 \right)\subseteq V\left( g_2 \right)$, and if $v\in V\left( g_1 \right)$, $e\in E\left( g_2 \right)$, and $v$ is an endpoint of $e$, then $e\in E\left( g_1 \right)$. 
