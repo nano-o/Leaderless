@@ -44,9 +44,11 @@ We expect that these two tunable knobs will allow a principled theoretical and e
 \section{Leaderless Generalized Consensus Algorithms}
 
 We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}. Each process receives proposals for commands of the form $\opn{Propose}(c)$, and must produce responses of the form $\opn{Decide}(\sigma)$, where $\sigma$ is a c-struct. 
-The sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties described below. But first, let us define c-structs and their operations.
+The sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties described below.
+We refer the read to~\cite{Lamport05GeneralizeConsensus} for the definition of c-structs and generalized consensus. Note that we use exactly the same notation.
 
-%\begin{comment}
+\begin{comment}
+
 A c-struct set is a set containing the element $\bot$ and with an append operator $\bullet$ such that $\sigma \bullet c$ is a c-struct, for any c-struct $\sigma$ and command $c$. 
 We also write the $\sigma\bullet\aseq{c_1,\cdots,c_n}$ for the c-struct $\sigma\bullet c_1\bullet\cdots\bullet c_n$.
 C-structs are partially ordered by the relation $\sqsubseteq$ defined such that $\sigma_1\sqsubseteq\sigma_2$ iff there exists a sequence of commands $cs$ such that $\sigma_2=\sigma_1\bullet cs$. Two c-structs are compatible when they have a common upper bound; when this is the case, two c-structs $\sigma_1$ and $\sigma_2$ have a least upper bound, noted $\bigsqcup\left( \sigma_1,\sigma_2 \right)$.
@@ -56,7 +58,7 @@ In the rest of the paper the symbol $c$, possibly sub-scripted, ranges over comm
 We can now state the generalized-consensus properties: non-triviality requires that any decided c-struct be of the form $\bot\bullet cs$, where $cs$ is a sequence of proposed commands; consistency requires than any two decided c-structs $\sigma_1$ and $\sigma_2$ be compatible; stability requires that when a process $p$ decides a c-struct $\sigma_1$ and time $t_1$ and $\sigma_2$ at time $t_2$, then $t_1 \leq t_2$ implies that $\sigma_1\sqsubseteq \sigma_2$; finally, liveness requires that
 if a command keeps beeing proposed, then a c-struct $\sigma$ containing the command is eventually decided.
 
-%\end{comment}
+\end{comment}
 
 We now present our abstract leaderless generalized consensus algorithm.
 A process $p$ receiving a command $c$ proceeds in three phases. First, it calls a \textit{dependency-set} sub-algorithm (\Cref{dep-algo}) to determine a set of commands $cs$ that the command $c$ may depend on. Second, the process $p$ proposes the mapping  $c\mapsto cs$ to a \textit{map-agreement} sub-algorithm (\Cref{map-algo}); the map-agreement sub-algorithm may subsequently commit a mapping $c\mapsto cs'$ for $c$, in which case $cs'$ becomes the set of dependencies of $c$, and we say that $c$ is executable when its dependency set is empty or when all its dependencies are executable. 
