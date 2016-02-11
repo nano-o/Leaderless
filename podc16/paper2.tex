@@ -198,9 +198,10 @@ Local variables: $m_p$, a map from commands to dependency sets, initially the em
 \subsection{Graph Processing}
 \label{graph-proc}
 
-The graph processing algorithm is executed locally by a node. It must compute $\opn{c-struct}\left( g_p \right)$, as defined below.
-Its main property is Lemma 1; Together with Invariants 1 and 2 (TODO, the invariants guaranteed by the dependency-set algorithm and the map-agreement algorithm), Lemma 1 implies that leaderless algorithms safely implement generalized consensus. 
-We assume that processes initially agree on a \emph{linearization function} $f$ mapping sets of commands to sequences of commands such that $f\left[ cs \right]$ is a total order on the set $cs$.
+The graph processing algorithm is executed locally by a node. It must compute the value of $\opn{c-struct}\left( g_p \right)$, as defined below.
+Its main property is Lemma 1; together with Invariants 1 and 2 (TODO, the invariants guaranteed by the dependency-set algorithm and the map-agreement algorithm), Lemma 1 implies that leaderless algorithms safely implement generalized consensus. 
+We assume that processes initially agree, for each set of commands $cs$, on a total order $<_{cs}$ on $cs$.
+In practice, if commands are attached a unique identifier among a totally ordered set, $<_{cs}$ can be the restriction of this total order on $cs$.
 
 %\textbf{Local dependency graph computed by a process.} 
 The local variable $cs_p$ of a process $p$ can be seen as describing a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the domain of $m_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ if and only both $c_1$ and $c_2$ are in $V\left( g_p \right)$ and $v_2 \in m_p\left[ v_1 \right]$ (i.e., $v_1$ depends on $v_2$). For example, if $cs_p = \left[ c_1 \mapsto \aset{c_2,c_3}, c_2 \mapsto \aset{c_1} \right]$ then $V\left(
@@ -213,7 +214,7 @@ For example, $\preceq_h = \aset{\left( c_1,c_3 \right)}$. % and $\opn{TOs}\left(
 %\textbf{Equivalence relation induced by a graph.}
 A directed graph $g$ \emph{induces an equivalence relation} $\sim_g$ on its vertices defined such that $v_1 \sim_g v_2$ iff $v_1$ and $v_2$ belong to the same strongly connected component.
 %\textbf{Linearizations of a dependency graph.}
-We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every pair of vertices $v_1,v_2\in V\left( g \right)$, $v_1 \preceq_g v_2$ implies $v_1 \ll v_2$, and if $v_1 \sim_g v_2$ and $\left( v_1,v_2 \right)\in f$ hold then $v_1 \ll v_2$.
+We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every pair of vertices $v_1,v_2\in V\left( g \right)$, $v_1 \preceq_g v_2$ implies $v_1 \ll v_2$, and if $v_1 \sim_g v_2$ and $\left( v_1,v_2 \right)\in f\left( \left[ v_1 \right] \right)$ hold then $v_1 \ll v_2$.
 %\textbf{Partial order on graphs.}
 We now define a partial order on graphs. If $g_1$ and $g_2$ are two graphs, then we write $g_1 \leq g_2$ iff $V\left( g_1 \right)\subseteq V\left( g_2 \right)$, and if $v\in V\left( g_1 \right)$, $e\in E\left( g_2 \right)$, and $v$ is an endpoint of $e$, then $e\in E\left( g_1 \right)$. 
 For example, consider the graphs $h'$ and $h''$ such that $V\left( h' \right)=\aset{c_1,c_2,c_4}$, $E\left( h' \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right)}$, $V\left( h'' \right)=\aset{c_1,c_3,c_4}$, and $E\left( h'' \right)=\aset{\left( c_1,c_3 \right)}$. We have that $h'\leq h$, but $ h''\not\leq h$.
