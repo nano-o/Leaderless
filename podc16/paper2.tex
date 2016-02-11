@@ -1,16 +1,28 @@
 \input{header}
 
-%\title{Brief Announcement: A Family of Leaderless Generalized-Consensus Algorithms}
+\title{Brief Announcement: A Family of Leaderless Generalized-Consensus Algorithms}
 
-%\author{}
+\author{
+Author 1\\
+ECE, Virginia Tech\\
+email
+\and
+Author 2\\
+ECE, Virginia Tech\\
+email
+\and
+Author 3\\
+ECE, Virginia Tech\\
+email
+}
 
-%\date{}
+\date{}
 
 \begin{document}
 
-%\maketitle
+\maketitle
 
-\input{cover}
+%\input{cover}
 
 \section{Introduction}
 
@@ -26,17 +38,25 @@ Note that any generalized consensus algorithm can be used to instantiate paramet
 
 We prove that all the algorithms in the family are safe and live, and we have formalized our ideas in TLA+ and thoroughly model-check our claims with the TLC model-checker.
 
-Our work sheds light on the common structure of algorithms like EPaxos and Alvin and allows to tune the performance of leaderless algorithms for specific scenarios by changing the underlying generalized-consensus and dependency-set algorithm. 
+Our work sheds light on the common structure of algorithms like EPaxos and Alvin and allows to tune the performance of leaderless algorithms for specific scenarios by changing the underlying map-agreement and dependency-set algorithms.
 We expect that these two tunable knobs will allow a principled theoretical and empirical evaluation of the trade-offs that can be achieved by this new family of algorithms.
 
 \section{Leaderless Generalized Consensus Algorithms}
 
-We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}. Each process receives proposals for commands of the form $\opn{Propose}(c)$, and it produces responses of the form $\opn{Decide}(\sigma)$, where $\sigma$ is a c-struct. A c-struct set is a set, containing the element $\bot$, with an append operator $\bullet$ such that $\sigma \bullet c$ is a c-struct, for any c-struct $\sigma$ and command $c$. 
-We also write the $\sigma\bullet\aseq{c_1,\cdots,c_n}$ for the c-struct $\sigma\bullet c_1\bullet\cdots\bullet c_n$. 
-C-structs are partially ordered by the relation $\preceq$ defined such that $\sigma_1\preceq\sigma_2$ iff there exists a sequence of commands $cs$ such that $\sigma_2=\sigma_1\bullet cs$.
+We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}. Each process receives proposals for commands of the form $\opn{Propose}(c)$, and must produce responses of the form $\opn{Decide}(\sigma)$, where $\sigma$ is a c-struct. 
+The sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties described below. But first, let us define c-structs and their operations.
+
+%\begin{comment}
+A c-struct set is a set containing the element $\bot$ and with an append operator $\bullet$ such that $\sigma \bullet c$ is a c-struct, for any c-struct $\sigma$ and command $c$. 
+We also write the $\sigma\bullet\aseq{c_1,\cdots,c_n}$ for the c-struct $\sigma\bullet c_1\bullet\cdots\bullet c_n$.
+C-structs are partially ordered by the relation $\sqsubseteq$ defined such that $\sigma_1\sqsubseteq\sigma_2$ iff there exists a sequence of commands $cs$ such that $\sigma_2=\sigma_1\bullet cs$. Two c-structs are compatible when they have a common upper bound; when this is the case, two c-structs $\sigma_1$ and $\sigma_2$ have a least upper bound, noted $\bigsqcup\left( \sigma_1,\sigma_2 \right)$.
 We say that two commands \textit{commute} when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands (see~\cite{Lamport05GeneralizeConsensus} for a complete discussion on c-struct). 
 In the rest of the paper the symbol $c$, possibly sub-scripted, ranges over commands, and the symbol $\mathcal{D}$, possibly sub-scripted, ranges over sets of commands.
-\todo{Present generalized consensus here?}
+
+We can now state the generalized-consensus properties: non-triviality requires that any decided c-struct be of the form $\bot\bullet cs$, where $cs$ is a sequence of proposed commands; consistency requires than any two decided c-structs $\sigma_1$ and $\sigma_2$ be compatible; stability requires that when a process $p$ decides a c-struct $\sigma_1$ and time $t_1$ and $\sigma_2$ at time $t_2$, then $t_1 \leq t_2$ implies that $\sigma_1\sqsubseteq \sigma_2$; finally, liveness requires that
+if a command keeps beeing proposed, then a c-struct $\sigma$ containing the command is eventually decided.
+
+%\end{comment}
 
 We now present our abstract leaderless generalized consensus algorithm.
 A process $p$ receiving a command $c$ proceeds in three phases. First, it calls a \textit{dependency-set} sub-algorithm (\Cref{dep-algo}) to determine a set of commands $cs$ that the command $c$ may depend on. Second, the process $p$ proposes the mapping  $c\mapsto cs$ to a \textit{map-agreement} sub-algorithm (\Cref{map-algo}); the map-agreement sub-algorithm may subsequently commit a mapping $c\mapsto cs'$ for $c$, in which case $cs'$ becomes the set of dependencies of $c$, and we say that $c$ is executable when its dependency set is empty or when all its dependencies are executable. 
@@ -126,8 +146,7 @@ The provided implementation satisfies the two properties of a dependency-set alg
   %  \item If the dependency set $d_1$ has been suggested for the command $c_1$, the dependency set $d_2$ has been suggested for the command $c_2$, and $c_1$ and $c_2$ do not commute, then either $c_1\in d_2$ or $c_2 \in d_1$.
 %\end{enumerate}
 
-\todo{``Suggest'' can also be used to trigger recovery}.
-
+\todo{``Suggest'' can also be used to trigger recovery}
 \todo{Write a suggestion on about GC of dependencies. Remove any command c such that a committed command depends on c. Also us the GC of the map-agreement component.}
 
 \subsection{Agreeing on Dependency Sets}
@@ -135,12 +154,15 @@ The provided implementation satisfies the two properties of a dependency-set alg
 
 A map-agreement algorithm exposes the input interface $\opn{propose}_p\left( c, \mathcal{D} \right)$, to propose a set of dependencies $\mathcal{D}$ for a command $c$, and the output interface $\opn{decide}_p\left( c, \mathcal{D} \right)$, to decide $\mathcal{D}$ for $c$, where $p\in P$ is the process executing the call.
 Moreover, a map-agreement algorithm must ensure that: 
+\begin{comment}
 \begin{enumerate}[noitemsep,nolistsep]
     \item If the set of dependencies $\mathcal{D}$ is decided for a command $c$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
     \item If $\mathcal{D}_1$ is decided for a command $c$ and $\mathcal{D}_2$ is decided for the same command $c$, then $\mathcal{D}_1$ is equal to $\mathcal{D}_2$.
  \end{enumerate}
 
 \todo{OR MORE FORMALLY}
+
+\end{comment}
 
 \begin{enumerate}[noitemsep,nolistsep]
     \item For any decision $\opn{decide}_p\left( c, \mathcal{D} \right)$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
