@@ -214,7 +214,7 @@ For example, $\preceq_h = \aset{\left( c_1,c_3 \right)}$. % and $\opn{TOs}\left(
 %\textbf{Equivalence relation induced by a graph.}
 A directed graph $g$ \emph{induces an equivalence relation} $\sim_g$ on its vertices defined such that $v_1 \sim_g v_2$ iff $v_1$ and $v_2$ belong to the same strongly connected component. We write $\left[ v \right]_g$ for the equivalence class of $v$ under $\sim_g$.
 %\textbf{Linearizations of a dependency graph.}
-We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every pair of vertices $v_1,v_2\in V\left( g \right)$, $v_1 \preceq_g v_2$ implies $v_1 \ll v_2$, and if $v_1 \sim_g v_2$ and $ v_1 <_{\left[ v_1 \right]} v_2$ hold then $v_1 \ll v_2$.
+We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every pair of vertices $v_1,v_2\in V\left( g \right)$, $v_1 \preceq_g v_2$ implies $v_1 \ll v_2$, and if $v_1 \sim_g v_2$ and $ v_1 <_{\left[ v_1 \right]_g} v_2$ hold then $v_1 \ll v_2$.
 %\textbf{Partial order on graphs.}
 
 We now define a partial order on graphs. If $g_1$ and $g_2$ are two graphs, then we write $g_1 \leq g_2$ iff $V\left( g_1 \right)\subseteq V\left( g_2 \right)$, and if $v\in V\left( g_1 \right)$, $e\in E\left( g_2 \right)$, and $v$ is an endpoint of $e$, then $e\in E\left( g_1 \right)$. 
@@ -225,7 +225,7 @@ Assume that: $g_1$ and $g_2$ are two dependency graphs;
 for every pair of non-commutative commands $c_1,c_2 \in V\left(g_2\right)$, either $\left( c_1,c_2 \right)\in E\left( g_2 \right)$ or $\left( c_2,c_1 \right)\in E\left( g_2 \right)$;
 $g_1 \leq g_2$;
 $l_1$ is a linearization of $g_1$ and $l_2$ is a linearization of $g_2$. 
-Then we have (a), $\bot\bullet l_1 \preceq \bot\bullet l_2$, and (b), if $g_1 = g_2$ then $\bot\bullet l_1 = \bot\bullet l_2$.
+Then we have (a), $\bot\bullet l_1 \sqsubseteq \bot\bullet l_2$, and (b), if $g_1 = g_2$ then $\bot\bullet l_1 = \bot\bullet l_2$.
 
 \textbf{Definition 1}
 We define $\opn{c-struct}\left( m_p \right) = \bot\bullet l$ where $l$ is a linearization of $g_p$.
