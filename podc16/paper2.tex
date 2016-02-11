@@ -79,9 +79,9 @@ Moreover, a dependency-set algorithm must ensure that:
     \item For any two suggestions $\opn{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\opn{suggest}_q \left( c_2,\mathcal{D}_2\right)$ (with $p$ possibly equal to $q$),  if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
 \end{enumerate}
 
-An example of implementation of such an algorithm is depicted by the pseudocode of \Cref{fig:deps-set-algo}. The idea is to let every process broadcast $c$ to all the processes in the system, in order to announce $c$. Then whenever a process $p$ receives $c$, it replies to the sender with the set $\mathcal{D}$ of commands that $p$ has observed so far, and such that $c$ and any command in $\mathcal{D}$ do not commute. Afterwards, the process announcing $c$ collects the sets $\mathcal{D}$ for $c$ from a quorum of $\mathcal{Q}$ processes, and it locally suggests the union of those sets as final dependency-set for $c$.
+An example of implementation of such an algorithm is depicted by the pseudocode of \Cref{fig:deps-set-algo}. The idea is to let every process broadcast $c$ to all the processes in the system, in order to announce $c$ (lines \ref{alg:announce}--\ref{alg:send-new-cmd}). Then whenever a process $p$ receives $c$, it replies to the sender with the set $\mathcal{D}$ of commands that $p$ has observed so far, and such that $c$ and any command in $\mathcal{D}$ do not commute (lines \ref{alg:receive-new-cmd}--\ref{alg:send-deps}). Afterwards, the process announcing $c$ collects the sets $\mathcal{D}$ for $c$ from a \textit{quorum} of $\mathcal{Q}$ processes, and it locally suggests the union of those sets as final dependency-set for $c$ (lines \ref{alg:receive-deps}--\ref{alg:call-suggest}). For the purpose of this example we allow for $\mathcal{Q}$ to be equal to any positive value that is not greater than the number of processes, as long as the following requirement is met: the intersection of any two quorums that are selected by processes to collect the sets of dependencies is not empty.
 
-The provided implementation satisfies the specification of a dependency-set algorithm for the following reasons. Since any command in a dependency-set that is suggested by a process must be in the set $cmds_q$ of the commands received by some process $q$, and a process receives a command if and only if there exists some process that previously announced the command, then it follows that any command in any suggested dependency-set has been previously announced. 
+The provided implementation satisfies the specification of a dependency-set algorithm for the following reasons. Since any command in a dependency-set that is suggested by a process must be in the set $cmds_q$ of the commands received by some process $q$, and a process receives a command if and only if there exists some process that previously announced the command, then it follows that any command in any suggested dependency-set has been previously announced. Further, since a process can suggest a set of dependencies $deps_p[c]$ for a command $c$ after it has received a reply for $c$ from at least a quorum of processes, we have that $\opn{suggest}_p \left( c,deps_p[c]\right)$ is called only if a quorum of processes $q$ have $c$ in their $cmds_q$. Therefore, by the requirement that we enforced on the quorums, we can conclude that for any two suggestions $\opn{suggest}_p \left( c_1,deps_p[c_1]\right)$ and $\opn{suggest}_q \left( c_2,deps_q[c_2]\right)$,  if $c_1$ and $c_2$ do not commute then either $c_1\in deps_q[c_2]$ or $c_2 \in deps_p[c_1]$.
 
 \begin{figure*}
 \centering
@@ -90,7 +90,7 @@ The provided implementation satisfies the specification of a dependency-set algo
 	\begin{varwidth}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
 
 		\begin{algorithmic}[1]
-			{\small
+			{\scriptsize
 			\START[\texttt{init$_p$}]{{\bf upon}}{$()$} \label{alg:init}
 			\State $cmds_p\gets\emptyset$ \label{alg:init-cmds}
 			\State $\forall c,$ $deps_p[c]\gets \emptyset$ \label{alg:init-deps}
@@ -107,15 +107,19 @@ The provided implementation satisfies the specification of a dependency-set algo
 	\end{varwidth}%
 }
 \label{fig:deps-set-algo1}
-}
-\hspace*{0.3in}\subfigure[receive of \texttt{cmd} and \texttt{deps} messages, and suggestion of dependencies for a command on process $p$.]{
+}	
+\hspace*{0.1in}\subfigure[receive of \texttt{cmd} and \texttt{deps} messages, and suggestion of dependencies for a command on process $p$.]{
 \noindent\fbox{%
 	\begin{varwidth}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
-
+	
 		\begin{algorithmic}[1]
-			{\small
+			\makeatletter
+			\setcounter{ALG@line}{8}
+			\makeatother
+			{\scriptsize
 			\START[$\langle \texttt{cmd}$ $|$ $c \rangle$]{{\bf upon receive}}{ {\bf from} $q$} \label{alg:receive-new-cmd}
-			\State $\mathcal{D} \gets \{ d : d \in cmds_p \land d\neq c \land d \asymp c \}$
+			\State $\mathcal{D} \gets \{ d : d \in cmds_p \land$
+			\Statex \hspace{2cm}$\land d\neq c \land d \asymp c \}$
 			\State $cmds_p\gets cmds_p\cup\{c\}$
 			\State {\bf send} $\langle \texttt{deps}$ $|$ $c,\mathcal{D} \rangle$ {\bf to} $q$\label{alg:send-deps}
 			\END
@@ -125,9 +129,10 @@ The provided implementation satisfies the specification of a dependency-set algo
 			\State $heard_p[c]\gets heard_p[c]\cup \{q\}$
 			\END
 			\Statex
-			\START[]{{\bf upon}}{$\exists c$ $:$ $ | heard_p[c] | \geq \mathcal{Q}$ $\land$ $suggested_p[c]=false$} \label{alg:receive-deps}
+			\START[]{{\bf upon}}{$\exists c$ $:$ $ | heard_p[c] | \geq \mathcal{Q}$ $\land$} \label{alg:receive-deps}
+			\Statex \hspace{1cm}$\land$ $suggested_p[c]=false$
 			\State $suggested_p[c]\gets true$
-			\State {\bf call} $\texttt{suggest}_p(c,deps_p[c])$
+			\State {\bf call} $\texttt{suggest}_p(c,deps_p[c])$ \label{alg:call-suggest}
 			\END
 			}
 		\end{algorithmic}
@@ -135,7 +140,37 @@ The provided implementation satisfies the specification of a dependency-set algo
 }
 \label{fig:deps-set-algo2}
 }
-\caption{Example of dependency-set algorithm implementation.}
+\hspace*{0.1in}\subfigure[Leaderless generalized consensus implementation.]{
+\noindent\fbox{%
+	\begin{varwidth}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+ 
+    
+		\begin{algorithmic}[1]
+			{\scriptsize
+			\START[$\opn{init}_p$]{{\bf upon}}{$()$}
+			\State $m_p\gets \emptyset$
+			\State $\sigma_p\gets \bot$
+			\END
+			\START[$\opn{GC-propose}_p$]{{\bf upon}}{$(c)$}
+			\State {\bf call} $\opn{announce}_p\left( c \right)$
+			\END
+			\Statex
+			\START[$\opn{suggest}_p$]{{\bf upon}}{$(c,\mathcal{D})$}
+			\State  $\opn{propose}_p( c,\mathcal{D})$ 			
+			\END
+			\Statex
+			\START[$\opn{decide}_p$]{{\bf upon}}{$(c,\mathcal{D})$}
+			\State  $m_p \gets m_p \oplus \left[ c \mapsto \mathcal{D}\right]$	
+			\State $\sigma_p \gets  \opn{c-struct}\left(m_p\right)$
+			\State $\opn{GC-decide}_p(\sigma_p)$		
+			\END
+			}
+		\end{algorithmic}
+	\end{varwidth}%
+}
+\label{fig:deps-set-algo3}
+}
+\caption{Example of dependency-set algorithm and leaderless generalized consensus implementations.}
 \label{fig:deps-set-algo}
 \end{figure*}
 
