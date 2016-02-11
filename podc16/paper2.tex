@@ -176,6 +176,9 @@ Local variables: $m_p$, a map from commands to dependency sets, initially the em
 \subsection{Graph Processing}
 \label{graph-proc}
 
+The graph processing algorithm must compute $\opn{c-struct}\left( g_p \right)$, as defined below.
+Its main property is Lemma 1; Together with Invariants 1 and 2 (TODO, the invariants guaranteed by the dependency-set algorithm and the map-agreement algorithm), Lemma 1 implies that leaderless algorithms safely implement generalized consensus. 
+
 \textbf{Local dependency graph computed by a process.} The local variable $cs_p$ of a process $p$ can be seen as describing a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the domain of $m_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ if and only both $c_1$ and $c_2$ are in $V\left( g_p \right)$ and $v_2 \in m_p\left[ v_1 \right]$ (i.e., $v_1$ depends on $v_2$). For example, if $cs_p = \left[ c_1 \mapsto \aset{c_2,c_3}, c_2 \mapsto \aset{c_1} \right]$ then $V\left(
 g_p \right) = \aset{c_1,c_2}$ and $E\left( g_p \right) = \aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right)}$.
 
