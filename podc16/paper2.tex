@@ -26,20 +26,20 @@ email
 
 \section{Introduction}
 
-Many agreement algorithms inspired by Paxos and MultiPaxos~\cite{lamport2001paxos} rely on the existence of a unique leader replica which enforces an ordering on commands during fault-free periods.
+Many agreement algorithms inspired by Paxos and MultiPaxos~\cite{lamport2001paxos} rely on the existence of a unique leader process which enforces an ordering on commands during fault-free periods.
 In practice, the unique leader can easily become a performance bottleneck for the system.
 Therefore, recently proposed agreement algorithms like Mencius~\cite{MaoJunqueiraMarzullo08MenciusBuildingEfficientReplicatedStateMachine}, EPaxos~\cite{MoraruAndersenKaminsky13ThereIsMoreConsensusEgalitarianParliaments}, or Alvin~\cite{TurcuETAL14BeGeneralDontGiveUpConsistency} strive to increase performance by avoiding the use of a unique leader.
-Mencius rotates the leader among the replicas but its structure remains close to MultiPaxos. 
+Mencius rotates the leader among the processes but its structure remains close to MultiPaxos. 
 However, EPaxos and Alvin are based on a novel algorithmic idea first introduced in EPaxos.
 
-In this paper, we show that the core algorithmic idea underlying EPaxos can be used to build a family of leaderless algorithms parameterized by (1) a per-command dependency-set computation algorithm, a concept that we define in the paper, and (2) an algorithm ensuring agreement on a mapping from commands to dependency sets. %(2) an algorithm ensuring a per-command agreement on a dependency set and which is oblivious of any ordering between commands. 
-An algorithm in the family is obtained by instantiating the two parameters to a concrete agreement algorithm and a concrete dependency-set computation algorithm, which are then used as sub-routines. 
-Note that any generalized consensus algorithm can be used to instantiate parameter 2, but that only a weaker problem than generalized consensus needs to be solved because no ordering constraints need to be enforced.
+We show that the core idea underlying EPaxos can be captured in an abstract algorithm that uses two abstractions: (1), a per-command dependency-set computation algorithm, a concept that we define in the paper, and (2), an algorithm ensuring, for each command proposed to it, agreement on a dependency set. Both abstractions lend themselves well to implementations that avoid the use of a unique leader process.
+
+Our abstract algorithm gives rise to a family of algorithms whose members are obtained by using a concrete map-agreement algorithm and a concrete dependency-set computation algorithm. 
+Note that any generalized consensus algorithm can be used to implement (2), but only a weaker problem than generalized consensus needs to be solved because no ordering among proposal is required.
+
+Our work has two main advantages: it enables modular correctness proofs of algorithms like EPaxos and it allows to tune the performance of implementations by changing the underlying map-agreement and dependency-set algorithms. We expect that these two tunable knobs will allow a principled theoretical and empirical evaluation of the trade-offs that can be achieved by this new family of algorithms.
 
 We prove that all the algorithms in the family are safe and live, and we have formalized our ideas in TLA+ and thoroughly model-check our claims with the TLC model-checker.
-
-Our work sheds light on the common structure of algorithms like EPaxos and Alvin and allows to tune the performance of leaderless algorithms for specific scenarios by changing the underlying map-agreement and dependency-set algorithms.
-We expect that these two tunable knobs will allow a principled theoretical and empirical evaluation of the trade-offs that can be achieved by this new family of algorithms.
 
 \section{Leaderless Generalized Consensus Algorithms}
 
@@ -62,9 +62,9 @@ if a command keeps beeing proposed, then a c-struct $\sigma$ containing the comm
 
 We now present our abstract leaderless generalized consensus algorithm.
 A process $p$ receiving a command $c$ proceeds in three phases. First, it calls a \textit{dependency-set} sub-algorithm (\Cref{dep-algo}) to determine a set of commands $cs$ that the command $c$ may depend on. Second, the process $p$ proposes the mapping  $c\mapsto cs$ to a \textit{map-agreement} sub-algorithm (\Cref{map-algo}); the map-agreement sub-algorithm may subsequently commit a mapping $c\mapsto cs'$ for $c$, in which case $cs'$ becomes the set of dependencies of $c$, and we say that $c$ is executable when its dependency set is empty or when all its dependencies are executable. 
-Finally, when $c$ is executable, the process $p$ may execute $c$ by deciding the c-struct obtained by running the \emph{graph-processing} algorithm described in \Cref{graph-proc}.
-Any other process can run the three phases independently of $p$ and eventually execute the command.
-However, we show that a leaderless  generalized consensus algorithm is always safe and is live when at least a majority of the processes are correct.
+Finally, when $c$ is executable, the process $p$ may execute $c$ by deciding the c-struct obtained by running the \emph{graph-processing} algorithm described in \Cref{abstract-algo}.
+Any other process can run the three phases independently of $p$ and eventually execute the command despite a crash of $p$.
+However, we show that a leaderless  generalized consensus algorithm is always safe and is live when its underlying dependency-set and map-agreement algorithms are safe and live.
 
 %In the next sections we present our specification of leaderless generalized consensus algorithms, which is parameterized over a \textit{dependency-set} algorithm (\Cref{dep-algo}) and a \textit{map-agreement} algorithm (\Cref{map-algo}). 
 
@@ -72,11 +72,13 @@ However, we show that a leaderless  generalized consensus algorithm is always sa
 \subsection{Computing Dependency-Sets}
 \label{dep-algo}
 
+\todo{Why not add the decide call to the interface, in order to guarantee liveness?}
+
 A dependency-set algorithm exposes the input interface $\opn{announce}_p\left( c \right)$, to announce a command $c$, and the output interface $\opn{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, where $p\in P$ is the process executing the call.  
 Moreover, a dependency-set algorithm must ensure that:
 \begin{enumerate}[noitemsep,nolistsep]
     \item For any suggestion $\opn{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before.
-    \item For any two suggestions $\opn{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\opn{suggest}_q \left( c_2,\mathcal{D}_2\right)$ (with $p$ possibly equal to $q$),  if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
+    \item For any two suggestions $\opn{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\opn{suggest}_q \left( c_2,\mathcal{D}_2\right)$ (with $p$ possibly equal to $q$), if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
 \end{enumerate}
 
 An example of implementation of such an algorithm is depicted by the pseudocode of \Cref{fig:deps-set-algo}. The idea is to let every process broadcast $c$ to all the processes in the system, in order to announce $c$. Then whenever a process $p$ receives $c$, it replies to the sender with the set $\mathcal{D}$ of commands that $p$ has observed so far, and such that $c$ and any command in $\mathcal{D}$ do not commute. Afterwards, the process announcing $c$ collects the sets $\mathcal{D}$ for $c$ from a quorum of $\mathcal{Q}$ processes, and it locally suggests the union of those sets as final dependency-set for $c$.
@@ -179,16 +181,9 @@ Note that any SMR algorithm, like MultiPaxos, can be used to implementing map-ag
 
 \todo{Cite Generalized Paxos as an example for bounding the data structures.}
 
-\subsection{Implementing Leaderless Generalized Consensus}
-
-Genearalized consensus~\cite{Lamport05GeneralizeConsensus} is a specification for state-machine replication algorithms. 
-A generalized-consensus algorithm exposes the input actions $propose\left( c \right)$, for a command $c$, and $learn\left( \sigma \right)$, for a c-struct $\sigma$.
-Moreover, a generalized-consensus algorithm must ensure that TODO.
-
-We now propose an algorithm that uses the dependency-set computation abstraction and the map-agreement abstraction to implement generalized consensus. We therefore obtain a family of generalized consensus algorithms where each member of the family is obtained by using concrete dependency-set and map-agreement algorithms.
-
-\todo{Explain the algorithm with pseudocode?}
-
+\subsection{The Abstract Generalized Consensus Algorithm}
+\label{abstract-algo}
+We now propose describe our abstract generalized consensus algorithm. 
 Local variables: $m_p$, a map from commands to dependency sets, initially the empty map; $\sigma_p$, a c-struct, initially $\bot$.
 \begin{itemize}[noitemsep,nolistsep]
     \item Upon ${\opn{propose}\left( c \right)}^p$: call ${\opn{announce}\left( c \right)}^p$.
@@ -196,9 +191,6 @@ Local variables: $m_p$, a map from commands to dependency sets, initially the em
     \item Upon ${\opn{decide}\left( c,d \right)}^p$: insert the mapping $c \rightarrow d$ in the map $m_p$.
     \item Periodically, update $\sigma_p$ to $\opn{c-struct}\left( m_p \right)$, where $\opn{c-struct}\left( m_p \right)$ is defined below.
 \end{itemize}
-
-\subsection{Graph Processing}
-\label{graph-proc}
 
 The graph processing algorithm is executed locally by a node. It must compute the value of $\opn{c-struct}\left( g_p \right)$, as defined below.
 Its main property is Lemma 1; together with Invariants 1 and 2 (TODO, the invariants guaranteed by the dependency-set algorithm and the map-agreement algorithm), Lemma 1 implies that leaderless algorithms safely implement generalized consensus. 
@@ -262,7 +254,7 @@ A sequence of commands $cseq$ is an $f$-linearization of the graph $g$ if and on
 
 \end{comment}
 
-\subsection{Correctenss Proof}
+\subsection{Correctness Proof}
 
 \subsection{Obtaining EPaxos}
 
