@@ -74,11 +74,12 @@ However, we show that a leaderless  generalized consensus algorithm is always sa
 
 \todo{Why not add the decide call to the interface, in order to guarantee liveness?}
 
-A dependency-set algorithm exposes the input interface $\opn{announce}_p\left( c \right)$, to announce a command $c$, and the output interface $\opn{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, where $p\in P$ is the process executing the call.  
+A dependency-set algorithm exposes the input interface $\opn{announce}_p\left( c \right)$, to announce a command $c$, the output interface $\opn{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, and an input interface $\opn{decide}\left( c,\mathcal{D} \right)$ (meant to receive inputs from the agreement sub-algorithm), where $p\in P$ is the process executing the call.
 Moreover, a dependency-set algorithm must ensure that:
 \begin{enumerate}[noitemsep,nolistsep]
     \item For any suggestion $\opn{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before.
     \item For any two suggestions $\opn{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\opn{suggest}_q \left( c_2,\mathcal{D}_2\right)$ (with $p$ possibly equal to $q$), if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
+    \item If a suggestion $\opn{suggest}_p(c,\mathcal{D})$ has been made and no input $\opn{decide}_q\left( c,\mathcal{D'} \right)$ is observed, then eventually a new suggestion $\opn{suggest}_r\left( c,\mathcal{D''} \right)$ for $r\neq p$ is made.
 \end{enumerate}
 
 An example of implementation of such an algorithm is depicted by the pseudocode of \Cref{fig:deps-set-algo}. The idea is to let every process broadcast $c$ to all the processes in the system, in order to announce $c$. Then whenever a process $p$ receives $c$, it replies to the sender with the set $\mathcal{D}$ of commands that $p$ has observed so far, and such that $c$ and any command in $\mathcal{D}$ do not commute. Afterwards, the process announcing $c$ collects the sets $\mathcal{D}$ for $c$ from a quorum of $\mathcal{Q}$ processes, and it locally suggests the union of those sets as final dependency-set for $c$.
