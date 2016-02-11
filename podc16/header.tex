@@ -14,7 +14,26 @@
 \usepackage[url=true,doi=false,isbn=false,backend=biber]{biblatex}
 \usepackage{color}
 \usepackage{ifdraft}
+
+
+\usepackage{amsmath}
+\usepackage{tabularx}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{varwidth}
+\usepackage{verbatim}
+\usepackage{subfigure}
 \addbibresource{managed.bib}
+
+\algrenewcommand\algorithmicprocedure{}
+\algtext*{EndProcedure}% Remove text
+\algtext*{EndWhile}% Remove text
+\algtext*{EndFor}% Remove text
+\algtext*{EndIf}% Remove text
+\algblockdefx[NAME]{START}{END}%
+   [3][Unknown]{#2 #1#3}%
+   {}
+\algtext*{END}% Remove text
 
 %\setcounter{tocdepth}{2}
 %\usepackage{pdfpages}
