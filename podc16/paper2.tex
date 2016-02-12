@@ -61,8 +61,7 @@ We have formalized our generic leaderless algorithm in TLA+ and have thoroughly 
 
 \section{Leaderless Generalized Consensus Algorithms}
 
-We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}. Each process receives proposals for commands of the form $\opn{Propose}(c)$, and must produce responses of the form $\opn{Decide}(\sigma)$, where $\sigma$ is a c-struct. 
-The sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties of generalized consensus.
+We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}, in which each process receives proposals for commands of the form $\opn{Propose}(c)$, and must produce responses of the form $\opn{Decide}(\sigma)$, where $\sigma$ is a c-struct, and the sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties of generalized consensus.
 We use the same notation and refer the reader to~\cite{Lamport05GeneralizeConsensus} for a thourough discussion of c-structs and generalized consensus. Briefly, the c-structs are a set, including $\bot$, with an operator $\bullet$ for appending commands to a c-struct. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands.
 We say that two commands \textit{commute} when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$.
 C-structs are partially ordered: $\sigma_1\sqsubseteq \sigma_2$ iff there exists a sequence of commands $s$ such that $\sigma_2 = \sigma_1\bullet s$ and $\bot\sqsubseteq \sigma$ for any
@@ -207,7 +206,7 @@ Moreover, a map-agreement algorithm must ensure that:
 \end{enumerate}
 
 
-\subsection{Local Dependency Graph Processing}
+\subsection{Local Dependency-Graph Processing}
 \label{abstract-algo}
 
 The graph processing algorithm is executed locally by a process (line 10 of \cref{fig:deps-set-algo3}). It must compute the value of $\opn{c-struct}\left( g_p \right)$, as defined in \cref{lindef}.
@@ -230,7 +229,8 @@ For example, consider the graphs $h'$ and $h''$ such that $V\left( h' \right)=\a
 \end{comment}
 
 Define graph intersection such that $V\left( g_1 \cap g_2 \right)=V\left( g_1 \right)\cap V\left( g_2 \right)$ and $E\left( g_1 \cap g_2 \right)= E\left( g_1 \right)\cap E\left( g_2 \right)$, and graph union such that $V\left( g_1 \cup g_2 \right)=V\left( g_1 \right)\cup V\left( g_2 \right)$ and $E\left( g_1 \cup g_2 \right)= E\left( g_1 \right)\cup E\left( g_2 \right)$.
-Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$ ($g$ is a vertex-induced subgraph of $g'$ iff $V\left( g \right)\subseteq V\left( g' \right)$, and for every $e\in E\left( g' \right)$, if both endpoints of $e$ are in $V\left( g \right)$, then $e\in E\left( g \right)$).
+We say that $g$ is a vertex-induced subgraph of $g'$ iff $V\left( g \right)\subseteq V\left( g' \right)$, and for every $e\in E\left( g' \right)$, if both endpoints of $e$ are in $V\left( g \right)$, then $e\in E\left( g \right)$).
+Define two graphs $g_1$ and $g_2$ as \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$.
 
 \begin{mylemma}\label{lemma:graph}
 Assume that $g_1$ and $g_2$ are two dependency graphs, 
