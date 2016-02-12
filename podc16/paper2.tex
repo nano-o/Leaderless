@@ -44,10 +44,12 @@ We prove that all the algorithms in the family are safe and live, and we have fo
 \section{Leaderless Generalized Consensus Algorithms}
 
 We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}. Each process receives proposals for commands of the form $\opn{Propose}(c)$, and must produce responses of the form $\opn{Decide}(\sigma)$, where $\sigma$ is a c-struct. 
-The sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties described below.
-We refer the reader to~\cite{Lamport05GeneralizeConsensus}, and we use the same notation, for the definition of c-structs and generalized consensus. Briefly, the c-structs are a set of elements, including $\bot$, with an operator $\bullet$ for appending commands to a c-struct. C-structs are partially ordered: $\sigma_1\sqsubseteq \sigma_2$ iff there exists a sequence of commands $\mathcal{D}$ such that $\sigma_2 = \sigma_1\bullet \mathcal{D}$ and $\bot\sqsubseteq \sigma$ for any
+The sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties of generalized consensus.
+We use the same notation and refer the reader to~\cite{Lamport05GeneralizeConsensus} for a thourough discussion of c-structs and generalized consensus. Briefly, the c-structs are a set, including $\bot$, with an operator $\bullet$ for appending commands to a c-struct. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands.
+We say that two commands \textit{commute} when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$.
+C-structs are partially ordered: $\sigma_1\sqsubseteq \sigma_2$ iff there exists a sequence of commands $\mathcal{D}$ such that $\sigma_2 = \sigma_1\bullet \mathcal{D}$ and $\bot\sqsubseteq \sigma$ for any
 $\sigma$. Two c-structs are compatible when they have a
-common upper bound. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands. The consistency property of generalized consensus requires that any two decided c-structs be compatible.
+common upper bound.  The consistency property of generalized consensus requires that any two decided c-structs be compatible.
 
 Our leaderless generalized consensus algorithm orchestrates a dependency-set sub-algorithm and map-agreement sub-algorithm as shown in \cref{fig:deps-set-algo3}.
 A process $p$ receiving a command $c$ proceeds in three phases. First, it calls a \textit{dependency-set} sub-algorithm (\Cref{dep-algo}) to determine a set of commands $\mathcal{D}$ that the command $c$ may depend on. Second, $p$ proposes the mapping  $c\mapsto \mathcal{D}$ to a \textit{map-agreement} sub-algorithm (\Cref{map-algo}); the map-agreement sub-algorithm may subsequently commit a mapping $c\mapsto \mathcal{D}'$ for $c$, in which case $\mathcal{D}'$ becomes the dependency set of $c$;
@@ -65,7 +67,7 @@ However, we show that a leaderless  generalized consensus algorithm is always sa
 A dependency-set algorithm exposes the input interface $\opn{announce}_p\left( c \right)$, to announce a command $c$, the output interface $\opn{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, and an input interface $\opn{commit}\left( c,\mathcal{D} \right)$ (meant to observe the map-agreement sub-algorithm), where $p\in P$ is the process executing the call.
 Moreover, a dependency-set algorithm must ensure that:
 \begin{itemize}[noitemsep,nolistsep]
-    \item[-] Safety: (a) For any suggestion $\opn{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before, and (b), for any two suggestions $\opn{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\opn{suggest}_q \left( c_2,\mathcal{D}_2\right)$, if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
+    \item[-] Safety: (a), for any suggestion $\opn{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before; (b), for any two suggestions $\opn{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\opn{suggest}_q \left( c_2,\mathcal{D}_2\right)$, if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
 %    \item If $c$ was announced by $p$, then eventually a dependency set is suggested for $c$ to $p$.
     \item[-] Liveness: (a) If a suggestion $\opn{suggest}_p\left( c \right)$ was made, then eventually a suggestion $\opn{suggest}\left( c,\mathcal{D} \right)_p$ is made, and (b), if a suggestion $\opn{suggest}_p(c,\mathcal{D})$ has been made and no input $\opn{commit}_q\left( c,\mathcal{D'} \right)$ is observed, then eventually a new suggestion $\opn{suggest}_r\left( c,\mathcal{D''} \right)$ for $r\neq p$ is made.
 \end{itemize}
@@ -183,9 +185,8 @@ A map-agreement algorithm exposes the input interface $\opn{propose}_p\left( c, 
 Moreover, a map-agreement algorithm must ensure that: 
 
 \begin{enumerate}[noitemsep,nolistsep]
-    \item[-] For any decision $\opn{commit}_p\left( c, \mathcal{D} \right)$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
-    \item[-] For any two decisions $\opn{commit}_p\left( c, \mathcal{D}_1 \right)$, $\opn{commit}_q\left( c, \mathcal{D}_2 \right)$, $\mathcal{D}_1$ is equal to $\mathcal{D}_2$.  
-
+    \item[-] Safety: (a), for any decision $\opn{commit}_p\left( c, \mathcal{D} \right)$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time; (b), for any two decisions $\opn{commit}_p\left( c, \mathcal{D}_1 \right)$, $\opn{commit}_q\left( c, \mathcal{D}_2 \right)$, $\mathcal{D}_1$ is equal to $\mathcal{D}_2$.  
+    \item[-] Liveness: if a proposal $propose_p\left( c,\mathcal{D} \right)$ is made, then eventually a decision $\opn{commit}_p\left( c, \mathcal{D} \right)$ is made.
 \end{enumerate}
 
 An example of implementation of the map-agreement algorithm can be any state machine replication algorithm, like MultiPaxos~\cite{lamport2001paxos}, where a pair of command $c$ and dependency-set $\mathcal{D}$ can be proposed to a instance of MultiPaxos that is identified by the command $c$ itself.
@@ -194,35 +195,18 @@ An example of implementation of the map-agreement algorithm can be any state mac
 \subsection{Processing the Dependency Graph}
 \label{abstract-algo}
 
-\begin{comment}
-Local variables: $m_p$, a map from commands to dependency sets, initially the empty map; $\sigma_p$, a c-struct, initially $\bot$.
-\begin{itemize}[noitemsep,nolistsep]
-    \item Upon ${\opn{propose}\left( c \right)}^p$: call ${\opn{announce}\left( c \right)}^p$.
-    \item Upon ${\opn{suggest}\left( c,d \right)}^p$: call ${\opn{propose}\left( c,d \right)}^p$.
-    \item Upon ${\opn{decide}\left( c,d \right)}^p$: insert the mapping $c \rightarrow d$ in the map $m_p$.
-    \item Periodically, update $\sigma_p$ to $\opn{c-struct}\left( m_p \right)$, where $\opn{c-struct}\left( m_p \right)$ is defined below.
-\end{itemize}
-
-\end{comment}
-
 The graph processing algorithm is executed locally by a node (line 10 of \cref{fig:deps-set-algo3}). It must compute the value of $\opn{c-struct}\left( g_p \right)$, as defined in \cref{lindef}.
-Its key property is \cref{lemma1}. 
+Its key property is \cref{lemma:graph}. 
 We assume that processes initially agree, for each set of commands $\mathcal{D}$, on a total order $<_{\mathcal{D}}$ on $\mathcal{D}$.
-In practice, if commands are attached a unique identifier among a totally ordered set, $<_{\mathcal{D}}$ can be the restriction of this total order on $\mathcal{D}$.
+In practice, if commands are attached a unique identifier among a totally ordered set, $<_{\mathcal{D}}$ can be the restriction of this total order to $\mathcal{D}$.
 
-%\textbf{Local dependency graph computed by a process.} 
 We say that a command $c$ in the domain of $m_p$ is \emph{executable} when no command $c$ which is not in the domain of $m_p$ can be reached from $c$ by recursively following $c$'s dependencies.
 The local variable $m_p$ denotes a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the executable commands of $m_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ iff $c_2 \in m_p\left[ c_1 \right]$ (i.e., $c_1$ depends on $c_2$). For example, if $m_p = \left[ c_1 \mapsto \aset{c_2,c_4}, c_2 \mapsto \aset{c_3}, c_3 \mapsto \aset{c_2}\right]$ then $V\left( g_p \right) = \aset{c_2,c_3}$ and $E\left( g_p \right) = \aset{\left( c_2,c_3 \right),\left( c_3,c_2 \right)}$.
 
-%\textbf{Orders induced by a graph.}
 A directed graph $g$ \emph{induces a partial order} $\preceq_g$ on its vertices defined such that $c_1 \preceq_g c_2$ iff there is a path from $c_1$ to $c_2$ and none from $c_2$ to $c_1$.
-%Let $\opn{TOs}\left( g \right)$ be the set of total orders $o$ such that $\preceq_g \subseteq o$.
 For example, consider $h$ where $V\left( h \right)=\aset{c_1,c_2,c_3,c_4}$ and $E\left( h \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right),\left( c_1,c_3 \right)}$. 
 We have that $\preceq_h = \aset{\left( c_1,c_3 \right)}$.
-%If $c\in V\left( g \right)$, we write $\left[ c \right]_g$ for the strongly connected component of $g$ to which $c$ belongs. 
-%\textbf{Linearizations of a dependency graph.}
 We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every $c_1,c_2\in V\left( g \right)$, $c_1 \preceq_g c_2$ implies $c_1 \ll c_2$, and if $c_1$ and $c_2$ belong to the same strongly connected component $\mathcal{D}$ and $ c_1 <_{\mathcal{D}} c_2$ hold, then $c_1 \ll c_2$. For example, assuming that $c_2 \leq_{\aset{c_1,c_2}} c_1$, the linearizations of $h$ are $\aseq{c_2,c_1,c_3,c_4}$, $\aseq{c_2,c_1,c_4,c_3}$, $\aseq{c_2,c_4,c_1,c_3}$, and $\aseq{c_4,c_2,c_1,c_3}$.
-%\textbf{Partial order on graphs.}
 
 \begin{comment}
 We now define a partial order on graphs. If $g_1$ and $g_2$ are two graphs, then we write $g_1 \leq g_2$ iff $V\left( g_1 \right)\subseteq V\left( g_2 \right)$, and if $v\in V\left( g_1 \right)$, $e\in E\left( g_2 \right)$, and $v$ is an endpoint of $e$, then $e\in E\left( g_1 \right)$. 
@@ -232,7 +216,7 @@ For example, consider the graphs $h'$ and $h''$ such that $V\left( h' \right)=\a
 Define the intersection of two graphs such that $V\left( g_1 \cap g_2 \right)=V\left( g_1 \right)\cap V\left( g_2 \right)$ and $E\left( g_1 \cap g_2 \right)= E\left( g_1 \right)\cap E\left( g_2 \right)$, and define their union such that $V\left( g_1 \cup g_2 \right)=V\left( g_1 \right)\cup V\left( g_2 \right)$ and $E\left( g_1 \cup g_2 \right)= E\left( g_1 \right)\cup E\left( g_2 \right)$.
 Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$.
 
-\begin{mylemma}\label{lemma1}
+\begin{mylemma}\label{lemma:graph}
 Assume that $g_1$ and $g_2$ are two dependency graphs, 
 that for every pair of non-commutative commands $c_1,c_2 \in V\left(g_2\right)$, either $\left( c_1,c_2 \right)\in E\left( g_2 \right)$ or $\left( c_2,c_1 \right)\in E\left( g_2 \right)$,
 that $g_1$ and $g_2$ are compatible,
@@ -245,38 +229,26 @@ We define $\opn{c-struct}\left( m_p \right) = \bot\bullet l$ where $l$ is a line
 By lemma 1.b, $\opn{c-struct}\left( m_p \right)$ is well-defined.
 \end{mydef}
 
-
-\begin{comment}
-
-\textbf{Graph of strongly connected components.} Given a graph $g$, let $\hat{g}$ be the graph whose vertices are the strongly connected components of $g$ (represented as sets of vertices) and where there is an edge from $g_1$ to $g_2$ if and only if there are two vertices $v_1$ and $v_2$ of $g$ such that $v_1 \in V\left( g_1 \right)$, $v_2 \in V\left( g_2 \right)$, and $\left( v_1,v_2 \right)\in E\left( g \right)$. Note that the reflexive and transitive closure of $V\left(  \hat{g} \right)$ is necessarily a partial order. 
-For example, consider $h$ such that $V\left( h \right)=\aset{c_1,c_2,c_3,c_4}$ and $E\left( h \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right),\left( c_1,c_3 \right)}$. Then $V(\hat{h}) = \aset{\aset{c_1,c_2},\aset{c_3},\aset{c_4}}$ and $E( \hat{h} )=\aset{\left( \aset{c_1,c_2},\aset{c_3} \right)}$. We will use $h$ as an example in the rest of the section.
-
-\textbf{Linearization function.} Consider a function $f$ mapping sets of commands to sequences of commands such that $f\left[ \mathcal{D} \right]$ is a total order on the set $\mathcal{D}$.
-
-\textbf{Linearizations of a dependency graph.}
-When $\hat{o}$ is a total order over the strongly connected components of $g$ such that $\hat{o} \in \opn{TOs}\left( \hat{g} \right)$, we say that a total order $l$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when $\left(v_1,v_2\right) \in l$ iff (1) there exists $vs_1,vs_2\in V\left(\hat{g}\right)$ such that $v_1\in vs_1$, $v_2\in vs_2$, and $\left( vs_1,vs_2 \right)\in \hat{o}$, or (2) there exists $vs_1\in V\left(\hat{g}\right)$ such that
-$v_1,v_2\in  vs_1$ and $\left( v_1,v_2 \right)\in f\left[  vs_1 \right]$.
-For example, if $f\left[ \aset{c_1,c_2} \right] = \aseq{c_2,c_1}$ then $\aseq{c_2,c_1,c_3,c_4}$ is a linearization of $h$ but $\aseq{c_1,c_2,c_3,c_4}$ is not and neither is $\aseq{c_3,c_2,c_1,c_4}$
-
-\end{comment}
-
-\begin{comment}
-Define $\opn{Lin}_g\left( \leq \right) = f\left[ V_1 \right] \cdot F\left[ V_2 \right] \cdot F\left[ V_n \right]$, where $V_i\in V\left( \hat{g} \right)$ 
-
-
-Define the set of linearizations $\opn{Lins}\left( g \right)$ of a graph $g$ as the set of sequences whose length is the cardinality of $V\left( g \right)$, which contain each element of $V\left( g \right)$ exactly once, and ... \todo{or first define the partial order induced by a graph and then its compatible total orders.}
-
-Consider a function $f$ mapping sets of commands to sequences of commands such that $f\left[ \mathcal{D} \right]$ contains each command in $\mathcal{D}$ exactly once.
-A sequence of commands $cseq$ is an $f$-linearization of the graph $g$ if and only there is a sequence whose element of strongly connected 
-
-\todo{Explain the graph processing algo independently? Its key property is that when $G1 \subseteq G2$ then $lin\left( c_1,G1 \right)$ is a prefix of $lin\left( c_2,G2 \right)$ or vice-versa.}
-
-\end{comment}
-
 \subsection{Consistency and Liveness}
-
-\textbf{Lemma 2}
+Let us now sketch why our generic leaderless algorithm meets the consistency and liveness requirements of generalized consensus. Consider an execution of the algorithm.
+\begin{mylemma}\label{lemma:compat}
 If $g_p^1$ is the graph $g_p$ at time $t_1$, $g_q^2$ is the graph $g_q$ at time $t_2$, then $g_p^1$ and $g_q^2$ are compatible.
+\end{mylemma}
+%\vspace{-5pt}
+\begin{proof*}
+Follows from the safety property (b) of the map-agreement algorithm and definition of the graph $g_p$.
+From (b) it follows that if $c$ is in the domain of both $m_p$ and $m_q$ then $m_p\left[ c \right] = m_q\left[ c \right]$.
+\end{proof*}
+%\vspace{-5pt}
+\begin{mylemma}
+    The consistency property always holds.
+    \label{lemma:consistency}
+\end{mylemma}
+%\vspace{-5pt}
+\begin{proof*}
+    By \cref{lemma:compat} and the safety property (b) of the dependency-set algorithm, $g_p^1$ and $g_q^2$ satisfy the premises of \cref{lemma:graph}. Therefore we get that $g_p^1$ and $g_q^2$ are compatible.
+\end{proof*}
+
 
 \begin{comment}
 \textbf{Lemma 3}
@@ -308,7 +280,7 @@ if a command keeps beeing proposed, then a c-struct $\sigma$ containing the comm
 
 An example of implementation of such an algorithm is depicted by the pseudocode of Figures~\ref{fig:deps-set-algo1} and~\ref{fig:deps-set-algo2}. The idea is to let every process broadcast $c$ to all the processes in the system, in order to announce $c$ (lines \ref{alg:announce}--\ref{alg:send-new-cmd}). Then whenever a process $p$ receives $c$, it replies to the sender with the set $\mathcal{D}$ of commands that $p$ has observed so far, and such that $c$ and any command in $\mathcal{D}$ do not commute (lines \ref{alg:receive-new-cmd}--\ref{alg:send-deps}). Afterwards, the process announcing $c$ collects the sets $\mathcal{D}$ for $c$ from a \textit{quorum} of $\mathcal{Q}$ processes, and it locally suggests the union of those sets as final dependency-set for $c$ (lines \ref{alg:receive-deps}--\ref{alg:call-suggest}). For the purpose of this example we allow for $\mathcal{Q}$ to be equal to any positive integer that is not greater than the number of processes, as long as the following requirement is met: the intersection of any two quorums that are selected by processes to collect the sets of dependencies is not empty.
 
-The provided implementation satisfies the specification of a dependency-set algorithm for the following reasons. Since any command in a dependency-set that is suggested by a process (lines~\ref{alg:update-deps-p} and~\ref{alg:call-suggest}) must be in the set $cmds_q$ of the commands received by some process $q$ (line~\ref{alg:update-d}), and a process receives a command if and only if there exists some process that previously announced the command (line~\ref{alg:send-new-cmd}), then it follows that any command in any suggested dependency-set has been previously announced. Further, since a process can suggest a set of dependencies $deps_p[c]$ for a command $c$ after it has received a reply for $c$ from at least a quorum of processes (lines~\ref{alg:receive-deps}--\ref{alg:call-suggest}), we have that $\opn{suggest}_p \left( c,deps_p[c]\right)$ is called only if a quorum of processes $q$ have $c$ in their $cmds_q$ (line~\ref{alg:update-cmds-p}). Therefore, by the requirement that we enforced on the quorums, we can conclude that for any two suggestions $\opn{suggest}_p \left( c_1,deps_p[c_1]\right)$ and $\opn{suggest}_q \left( c_2,deps_q[c_2]\right)$,  if $c_1$ and $c_2$ do not commute then either $c_1\in deps_q[c_2]$ or $c_2 \in deps_p[c_1]$.
+The provided implementation satisfies the specification of a dependency-set algorithm for the following reasons. Since any command in a dependency-set that is suggested by a process (lines~\ref{alg:update-deps-p} and~\ref{alg:call-suggest}) must be in the set $cmds_q$ of the commands received by some process $q$ (line~\ref{alg:update-d}), and a process receives a command iff there exists some process that previously announced the command (line~\ref{alg:send-new-cmd}), then it follows that any command in any suggested dependency-set has been previously announced. Further, since a process can suggest a set of dependencies $deps_p[c]$ for a command $c$ after it has received a reply for $c$ from at least a quorum of processes (lines~\ref{alg:receive-deps}--\ref{alg:call-suggest}), we have that $\opn{suggest}_p \left( c,deps_p[c]\right)$ is called only if a quorum of processes $q$ have $c$ in their $cmds_q$ (line~\ref{alg:update-cmds-p}). Therefore, by the requirement that we enforced on the quorums, we can conclude that for any two suggestions $\opn{suggest}_p \left( c_1,deps_p[c_1]\right)$ and $\opn{suggest}_q \left( c_2,deps_q[c_2]\right)$,  if $c_1$ and $c_2$ do not commute then either $c_1\in deps_q[c_2]$ or $c_2 \in deps_p[c_1]$.
 
 
 \end{document}

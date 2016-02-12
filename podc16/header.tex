@@ -83,3 +83,16 @@
     \thm@preskip=\parskip \thm@postskip=0pt
 }
 \makeatother
+
+\makeatletter
+\newenvironment{proof*}[1][\proofname]{\par
+    \pushQED{\qed}%
+    \normalfont \partopsep=\z@skip \topsep=\z@skip
+    \trivlist
+\item[\hskip\labelsep
+        \itshape
+    #1\@addpunct{.}]\ignorespaces
+}{%
+    \popQED\endtrivlist\@endpefalse
+}
+\makeatother
