@@ -194,7 +194,7 @@ An example of implementation of the map-agreement algorithm can be any state mac
 \label{abstract-algo}
 
 The graph processing algorithm is executed locally by a node (line 10 of \cref{fig:deps-set-algo3}). It must compute the value of $\opn{c-struct}\left( g_p \right)$, as defined in \cref{lindef}.
-Its key property is \cref{lemma1}. 
+Its key property is \cref{lemma:graph}. 
 We assume that processes initially agree, for each set of commands $\mathcal{D}$, on a total order $<_{\mathcal{D}}$ on $\mathcal{D}$.
 In practice, if commands are attached a unique identifier among a totally ordered set, $<_{\mathcal{D}}$ can be the restriction of this total order to $\mathcal{D}$.
 
@@ -214,7 +214,7 @@ For example, consider the graphs $h'$ and $h''$ such that $V\left( h' \right)=\a
 Define the intersection of two graphs such that $V\left( g_1 \cap g_2 \right)=V\left( g_1 \right)\cap V\left( g_2 \right)$ and $E\left( g_1 \cap g_2 \right)= E\left( g_1 \right)\cap E\left( g_2 \right)$, and define their union such that $V\left( g_1 \cup g_2 \right)=V\left( g_1 \right)\cup V\left( g_2 \right)$ and $E\left( g_1 \cup g_2 \right)= E\left( g_1 \right)\cup E\left( g_2 \right)$.
 Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$.
 
-\begin{mylemma}\label{lemma1}
+\begin{mylemma}\label{lemma:graph}
 Assume that $g_1$ and $g_2$ are two dependency graphs, 
 that for every pair of non-commutative commands $c_1,c_2 \in V\left(g_2\right)$, either $\left( c_1,c_2 \right)\in E\left( g_2 \right)$ or $\left( c_2,c_1 \right)\in E\left( g_2 \right)$,
 that $g_1$ and $g_2$ are compatible,
@@ -228,12 +228,24 @@ By lemma 1.b, $\opn{c-struct}\left( m_p \right)$ is well-defined.
 \end{mydef}
 
 \subsection{Consistency and Liveness}
-
-\begin{mylemma}\label{lemma-compat}
+Let us now sketch why our generic leaderless algorithm meets the consistency and liveness requirements of generalized consensus. Consider an execution of the algorithm.
+\begin{mylemma}\label{lemma:compat}
 If $g_p^1$ is the graph $g_p$ at time $t_1$, $g_q^2$ is the graph $g_q$ at time $t_2$, then $g_p^1$ and $g_q^2$ are compatible.
 \end{mylemma}
-\Cref{lemma-compat} follows from the safety property (b) of the map-agreement algorithm and definition of the graph $g_p$.
+%\vspace{-5pt}
+\begin{proof*}
+Follows from the safety property (b) of the map-agreement algorithm and definition of the graph $g_p$.
 From (b) it follows that if $c$ is in the domain of both $m_p$ and $m_q$ then $m_p\left[ c \right] = m_q\left[ c \right]$.
+\end{proof*}
+%\vspace{-5pt}
+\begin{mylemma}
+    The consistency property always holds.
+    \label{lemma:consistency}
+\end{mylemma}
+%\vspace{-5pt}
+\begin{proof*}
+    By \cref{lemma:compat} and the safety property (b) of the dependency-set algorithm, $g_p^1$ and $g_q^2$ satisfy the premises of \cref{lemma:graph}. Therefore we get that $g_p^1$ and $g_q^2$ are compatible.
+\end{proof*}
 
 
 \begin{comment}
