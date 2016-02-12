@@ -79,7 +79,7 @@ Any other process can run the three phases independently of $p$ and eventually e
 %In the next sections we present our specification of leaderless generalized consensus algorithms, which is parameterized over a \textit{dependency-set} algorithm (\Cref{dep-algo}) and a \textit{map-agreement} algorithm (\Cref{map-algo}). 
 
 
-\subsection{Computing Dependency-Sets}
+\subsection{Computing Potential Dependency Sets}
 \label{dep-algo}
 
 A dependency-set algorithm exposes at each process $p$ the input interface $\opn{announce}_p\left( c \right)$, to announce a command $c$, the output interface $\opn{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, and an input interface $\opn{commit}\left( c,\mathcal{D} \right)$,  to observe which command is committed by the other abstraction.
@@ -123,7 +123,7 @@ Moreover, a dependency-set algorithm must ensure that:
 }
 \label{fig:deps-set-algo3}
 }
-\hspace*{0.1in}\subfigure[Example of dependency-set algorithm implementation - part 1.]{
+\hspace*{0.1in}\subfigure[Dependency-set algorithm implementation - part 1.]{
 \noindent\fbox{%
 	\begin{varwidth}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
 
@@ -245,29 +245,42 @@ We define $\opn{c-struct}\left( m_p \right) = \bot\bullet l$ where $l$ is a line
 By lemma 1.b, $\opn{c-struct}\left( m_p \right)$ is well-defined.
 \end{mydef}
 
-\subsection{Satisfying Consistency and Liveness of Generalized Consensus}
+\subsection{Correctness}
 Consider an execution of the algorithm.
-\begin{mylemma}\label{lemma:compat}
-If $g_p^1$ is the graph $g_p$ at time $t_1$, $g_q^2$ is the graph $g_q$ at time $t_2$, then $g_p^1$ and $g_q^2$ are compatible.
-\end{mylemma}
-\begin{proof*}
+%\begin{mylemma}\label{lemma:compat}
+%If $g_p^1$ is the graph $g_p$ at time $t_1$, $g_q^2$ is the graph $g_q$ at time $t_2$, then $g_p^1$ and $g_q^2$ are compatible.
+%\end{mylemma}
+%\begin{proof*}
 TODO
 %Follows from the safety property (b) of the map-agreement algorithm and definition of the graph $g_p$.
 %From (b) it follows that if $c$ is in the domain of both $m_p$ and $m_q$ then $m_p\left[ c \right] = m_q\left[ c \right]$.
 \end{proof*}
-\begin{mythm}
-    The consistency property of generalized consensus always holds.
-    \label{lemma:consistency}
-\end{mythm}
-\begin{proof*}
-    By \cref{lemma:compat} and \ref{suggestion-agreement}, $g_p^1$ and $g_q^2$ satisfy the premises of \cref{lemma:graph}. Therefore we get that $g_p^1$ and $g_q^2$ are compatible.
-\end{proof*}
-\begin{mythm}
-    If a command $c$ which is GC-proposed is then repeatedly GC-proposed, then a c-struct containing $c$ is eventually decided.
-\end{mythm}
-\begin{proof*}
-    The properties \ref{eventual-suggestion} and \ref{re-suggest} ensure that dependency sets are repeatedly proposed for $c$ to the map-agreement algorithm as long as a commit is not observed. Moreover, the map-agreement algorithm ensures that when dependency sets are repeatedly proposed for $c$, then a dependency set will eventually be committed for $c$. Similarly, any dependency of $c$ is eventually committed and $c$ becomes executable, at which points it is included in the next decided c-struct.
-\end{proof*}
+
+\textbf{Lemma 2.} If $g_p^1$ is the graph $g_p$ at time $t_1$, $g_q^2$ is the graph $g_q$ at time $t_2$, then $g_p^1$ and $g_q^2$ are compatible.  
+\emph{Proof.} TODO
+
+\textbf{Theorem 1.}
+The consistency property of generalized consensus always holds.
+\emph{Proof.} By lemma 2 and property \ref{suggestion-agreement}, $g_p^1$ and $g_q^2$ satisfy the premises of \cref{lemma:graph}. Therefore we get that $g_p^1$ and $g_q^2$ are compatible.
+%\begin{mythm}
+%    The consistency property of generalized consensus always holds.
+%    \label{lemma:consistency}
+%\end{mythm}
+%\begin{proof*}
+%    By \cref{lemma:compat} and \ref{suggestion-agreement}, $g_p^1$ and $g_q^2$ satisfy the premises of \cref{lemma:graph}. Therefore we get that $g_p^1$ and $g_q^2$ are compatible.
+%\end{proof*}
+
+\textbf{Theorem 2.}
+If a command $c$ which is GC-proposed is then repeatedly GC-proposed, then a c-struct containing $c$ is eventually decided.
+\emph{Proof.}
+The properties \ref{eventual-suggestion} and \ref{re-suggest} ensure that dependency sets are repeatedly proposed for $c$ to the map-agreement algorithm as long as a commit is not observed. Moreover, the map-agreement algorithm ensures that when dependency sets are repeatedly proposed for $c$, then a dependency set will eventually be committed for $c$. Similarly, any dependency of $c$ is eventually committed and $c$ becomes executable, at which points it is included in the next decided c-struct.
+
+%\begin{mythm}
+%    If a command $c$ which is GC-proposed is then repeatedly GC-proposed, then a c-struct containing $c$ is eventually decided.
+%\end{mythm}
+%\begin{proof*}
+%    The properties \ref{eventual-suggestion} and \ref{re-suggest} ensure that dependency sets are repeatedly proposed for $c$ to the map-agreement algorithm as long as a commit is not observed. Moreover, the map-agreement algorithm ensures that when dependency sets are repeatedly proposed for $c$, then a dependency set will eventually be committed for $c$. Similarly, any dependency of $c$ is eventually committed and $c$ becomes executable, at which points it is included in the next decided c-struct.
+%\end{proof*}
 
 
 \begin{comment}
