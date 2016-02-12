@@ -49,7 +49,7 @@ We use the same notation and refer the reader to~\cite{Lamport05GeneralizeConsen
 We say that two commands \textit{commute} when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$.
 C-structs are partially ordered: $\sigma_1\sqsubseteq \sigma_2$ iff there exists a sequence of commands $\mathcal{D}$ such that $\sigma_2 = \sigma_1\bullet \mathcal{D}$ and $\bot\sqsubseteq \sigma$ for any
 $\sigma$. Two c-structs are compatible when they have a
-common upper bound.  The consistency property of generalized consensus requires that any two decided c-structs be compatible.
+common upper bound. A c-struct contains a command $c$ when it is of the form $\bot\bullet cs$ where $c$ appears in the sequence of commands $cs$. The consistency property of generalized consensus requires that any two decided c-structs be compatible.
 
 Our leaderless generalized consensus algorithm orchestrates a dependency-set sub-algorithm and map-agreement sub-algorithm as shown in \cref{fig:deps-set-algo3}.
 A process $p$ receiving a command $c$ proceeds in three phases. First, it calls a \textit{dependency-set} sub-algorithm (\Cref{dep-algo}) to determine a set of commands $\mathcal{D}$ that the command $c$ may depend on. Second, $p$ proposes the mapping  $c\mapsto \mathcal{D}$ to a \textit{map-agreement} sub-algorithm (\Cref{map-algo}); the map-agreement sub-algorithm may subsequently commit a mapping $c\mapsto \mathcal{D}'$ for $c$, in which case $\mathcal{D}'$ becomes the dependency set of $c$;
@@ -227,24 +227,27 @@ We define $\opn{c-struct}\left( m_p \right) = \bot\bullet l$ where $l$ is a line
 By lemma 1.b, $\opn{c-struct}\left( m_p \right)$ is well-defined.
 \end{mydef}
 
-\subsection{Consistency and Liveness}
-Let us now sketch why our generic leaderless algorithm meets the consistency and liveness requirements of generalized consensus. Consider an execution of the algorithm.
+\subsection{Satisfying Consistency and Liveness of Generalized Consensus}
+Consider an execution of the algorithm.
 \begin{mylemma}\label{lemma:compat}
 If $g_p^1$ is the graph $g_p$ at time $t_1$, $g_q^2$ is the graph $g_q$ at time $t_2$, then $g_p^1$ and $g_q^2$ are compatible.
 \end{mylemma}
-%\vspace{-5pt}
 \begin{proof*}
 Follows from the safety property (b) of the map-agreement algorithm and definition of the graph $g_p$.
 From (b) it follows that if $c$ is in the domain of both $m_p$ and $m_q$ then $m_p\left[ c \right] = m_q\left[ c \right]$.
 \end{proof*}
-%\vspace{-5pt}
-\begin{mylemma}
+\begin{mythm}
     The consistency property always holds.
     \label{lemma:consistency}
-\end{mylemma}
-%\vspace{-5pt}
+\end{mythm}
 \begin{proof*}
     By \cref{lemma:compat} and the safety property (b) of the dependency-set algorithm, $g_p^1$ and $g_q^2$ satisfy the premises of \cref{lemma:graph}. Therefore we get that $g_p^1$ and $g_q^2$ are compatible.
+\end{proof*}
+\begin{mythm}
+    If a command $c$ which is GC-proposed is then repeatedly GC-proposed, then a c-struct containing $c$ is eventually decided.
+\end{mythm}
+\begin{proof*}
+    The liveness properties (a) and (b) of the dependency-set algorithm ensures that some dependency sets are repeatedly proposed for $c$ to the map-agreement algorithm, as long as a commit is not observed. Moreover, the map-agreement algorithm ensures that when dependency sets are repeatedly proposed for $c$, then a dependency set will eventually be committed for $c$. Similarly, any dependency of $c$ is eventually committed and $c$ becomes executable, at which points it is included in the next decided c-struct.
 \end{proof*}
 
 
