@@ -65,16 +65,17 @@ We consider a set of processes $P$ subject to crash-stop faults and communicatin
 The sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties of generalized consensus.
 We use the same notation and refer the reader to~\cite{Lamport05GeneralizeConsensus} for a thourough discussion of c-structs and generalized consensus. Briefly, the c-structs are a set, including $\bot$, with an operator $\bullet$ for appending commands to a c-struct. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands.
 We say that two commands \textit{commute} when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$.
-C-structs are partially ordered: $\sigma_1\sqsubseteq \sigma_2$ iff there exists a sequence of commands $\mathcal{D}$ such that $\sigma_2 = \sigma_1\bullet \mathcal{D}$ and $\bot\sqsubseteq \sigma$ for any
+C-structs are partially ordered: $\sigma_1\sqsubseteq \sigma_2$ iff there exists a sequence of commands $s$ such that $\sigma_2 = \sigma_1\bullet s$ and $\bot\sqsubseteq \sigma$ for any
 $\sigma$. Two c-structs are compatible when they have a
 common upper bound. A c-struct contains a command $c$ when it is of the form $\bot\bullet cs$ where $c$ appears in the sequence of commands $cs$. The consistency property of generalized consensus requires that any two decided c-structs be compatible.
 
 Our leaderless generalized consensus algorithm orchestrates a dependency-set algorithm and map-agreement algorithm as shown in \cref{fig:deps-set-algo3}.
-A process $p$ maintains two local variables $m_p$ (a map from commands to sets of commands) and $\sigma_p$ (a c-struct). Upon  receiving a command $c$, $p$ proceeds in three phases. First, it calls a \textit{dependency-set} algorithm (\Cref{dep-algo}) to determine a set of commands $\mathcal{D}$ that the command $c$ may depend on. Second, $p$ proposes the mapping  $c\mapsto \mathcal{D}$ to a \textit{map-agreement} algorithm (\Cref{map-algo}); the map-agreement algorithm may subsequently commit a mapping $c\mapsto \mathcal{D}'$ for $c$, in which case $p$ inserts the mapping $\left[c \mapsto \mathcal{D}'\right]$ in $m_p$, and we say that $\mathcal{D}'$ is the dependency set of $c$.
+A process $p$ maintains two local variables $m_p$ (a map from commands to sets of commands) and $\sigma_p$ (a c-struct). Upon  receiving a command $c$, $p$ proceeds in three phases. First, it calls a \textit{dependency-set} algorithm (\Cref{dep-algo}) to determine a set of commands $\mathcal{D}$ that the command $c$ may depend on. Second, $p$ proposes the mapping  $c\mapsto \mathcal{D}$ to a \textit{map-agreement} algorithm (\Cref{map-algo}); when the map-agreement algorithm
+commits a mapping $c\mapsto \mathcal{D}'$ for $c$, $p$ inserts the mapping $\left[c \mapsto \mathcal{D}'\right]$ in $m_p$, and we say that $\mathcal{D}'$ is the dependency set of $c$.
 We say that $c$ is executable in $m_p$ when all its transitive dependencies are known. %no command $c'$ for which no mapping has been committed is reachable from $c$ by recursively following committed mappings. 
 Finally, when $c$ is executable in $m_p$, then $p$ may execute $c$ by deciding the c-struct obtained by \emph{locally} running a \emph{graph-processing} algorithm described in \Cref{abstract-algo}.
-Any other process can run the three phases independently of $p$ and eventually execute the command despite a crash of $p$.
-We show that the leaderless  generalized consensus algorithm guarantees the safety and liveness properties of generalized consensus when its underlying dependency-set and map-agreement algorithms satisfy their safety and liveness properties.
+Any other process can run the three phases independently of $p$ and eventually execute the command, possibly despite a crash of $p$.
+%We show that the leaderless  generalized consensus algorithm guarantees the safety and liveness properties of generalized consensus when its underlying dependency-set and map-agreement algorithms satisfy their safety and liveness properties.
 
 %In the next sections we present our specification of leaderless generalized consensus algorithms, which is parameterized over a \textit{dependency-set} algorithm (\Cref{dep-algo}) and a \textit{map-agreement} algorithm (\Cref{map-algo}). 
 
@@ -82,16 +83,13 @@ We show that the leaderless  generalized consensus algorithm guarantees the safe
 \subsection{Computing Dependency-Sets}
 \label{dep-algo}
 
-A dependency-set algorithm exposes the input interface $\opn{announce}_p\left( c \right)$, to announce a command $c$, the output interface $\opn{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, and an input interface $\opn{commit}\left( c,\mathcal{D} \right)$ (meant to observe the map-agreement algorithm), where $p\in P$ is the process executing the call.
+A dependency-set algorithm exposes at each process $p$ the input interface $\opn{announce}_p\left( c \right)$, to announce a command $c$, the output interface $\opn{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, and an input interface $\opn{commit}\left( c,\mathcal{D} \right)$,  to observe which command is committed by the other abstraction.
 Moreover, a dependency-set algorithm must ensure that:
 \begin{itemize}[noitemsep,nolistsep]
     \item[-] Safety: (\setword{S1}{dep-valid}), for any suggestion $\opn{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before; (\setword{S2}{suggestion-agreement}), for any two suggestions $\opn{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\opn{suggest}_q \left( c_2,\mathcal{D}_2\right)$, if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
 %    \item If $c$ was announced by $p$, then eventually a dependency set is suggested for $c$ to $p$.
     \item[-] Liveness: (\setword{L1}{eventual-suggestion}) If a suggestion $\opn{suggest}_p\left( c \right)$ was made, then eventually a suggestion $\opn{suggest}\left( c,\mathcal{D} \right)_p$ is made, and (\setword{L2}{re-suggest}), if a suggestion $\opn{suggest}_p(c,\mathcal{D})$ has been made and no input $\opn{commit}_q\left( c,\mathcal{D'} \right)$ is observed, then eventually a new suggestion $\opn{suggest}_r\left( c,\mathcal{D''} \right)$ for $r\neq p$ is made.
 \end{itemize}
-
-An example of implementation of such an algorithm is depicted by the pseudocode of \cref{fig:deps-set-algo1,fig:deps-set-algo2}. Due to space constraints, our example focuses on satisfying the safety property only. The main idea is the following: a process $p$ announcing a command $c$ broadcasts $c$ to all the processes, and it suggests the dependency-set $deps_p[c]$ for $c$ as the union of the sets $\mathcal{D}$ that it receives as replies from a quorum of $\mathcal{Q}$ processes; on the other hand, a process that receives an announcement for $c$, computes its reply $\mathcal{D}$ for $c$ as the set of commands $d$ that it received so far, and such that $c$ and $d$ do not commute. The choice of the value of $\mathcal{Q}$ must be such that the intersection of any two quorums is not empty. About correctness, we can easily prove that such an implementation satisfies the safety property by noticing that:  any process $p$ inserts a command $d$ in a dependency-set $\mathcal{D}$ that $p$ sent as a reply for a command $c$, only if $p$ previously received $d$. Therefore, every command suggested in a dependency-set must have been announced before. Further, since a process can suggest a set of dependencies $deps_p[c]$ for a command $c$ after it has received a reply for $c$ from at least a quorum of processes, and thanks to the requirement that we enforced on the intersection of quorums, we can conclude that for any two suggestions $\opn{suggest}_p \left( c_1,deps_p[c_1]\right)$ and $\opn{suggest}_q \left( c_2,deps_q[c_2]\right)$,  if $c_1$ and $c_2$ do not commute then either $c_1\in deps_q[c_2]$ or $c_2 \in deps_p[c_1]$.
-
 
 \begin{figure*}
 \centering
@@ -208,10 +206,8 @@ Moreover, a map-agreement algorithm must ensure that:
     \item[-] Liveness: (\setword{L3}{eventual-commit}) if a proposal $propose_p\left( c,\mathcal{D} \right)$ is made, then eventually a decision $\opn{commit}_p\left( c, \mathcal{D} \right)$ is made.
 \end{enumerate}
 
-An example of implementation of the map-agreement algorithm can be any state machine replication algorithm, like MultiPaxos~\cite{lamport2001paxos}, where a pair of command $c$ and dependency-set $\mathcal{D}$ can be proposed to a instance of MultiPaxos that is identified by the command $c$ itself.
-%used to implementing map-agreement by uniquely associating commands to MultiPaxos instance numbers.
 
-\subsection{Processing the Dependency Graph}
+\subsection{Local Dependency Graph Processing}
 \label{abstract-algo}
 
 The graph processing algorithm is executed locally by a process (line 10 of \cref{fig:deps-set-algo3}). It must compute the value of $\opn{c-struct}\left( g_p \right)$, as defined in \cref{lindef}.
@@ -283,7 +279,27 @@ If $m_p\subseteq m_q$
 
 \end{comment}
 
-\subsection{Obtaining EPaxos}
+\subsection{Implementing the Abstractions}
+Both the dependency-set and map-agreement abstractions are well suited to leaderless implementations.
+
+The dependency-set abstraction can be implemented as shown in \cref{fig:deps-set-algo1,fig:deps-set-algo2}. Due to space constraints, our example focuses on satisfying the safety property only. A process $p$ announcing a command $c$ asks all the processes for the set of commands they have seen so far and that do not commute with $c$. Then, it suggests the union of the dependency sets received from a \emph{quorum} of processes. Quorums are sets of processes such that the intersection of any two
+quorums is not empty. Since $p$ receives sets of commands seen by other processes, the implementation trivially ensures \ref{dep-valid}. 
+Further, consider two suggestions $\opn{suggest}\left(c_1,\matthcal{D}_1\right)$ and $\opn{suggest}\left(c_2,\matthcal{D}_2\right)$ where $c_1$ and $c_2$ do not commute. There are two quorums $Q_1$ and $Q_2$ such that $\matthcal{D}_1$ was computed from $Q_1$ and $\matthcal{D}_2$ was computed from $Q_2$. By the definition of quorums, there is a process $q$ belonging to both $Q_1$ and $Q_2$. This process $q$ received either $c_1$ before $c_2$, in which case $c_1\in
+\mathcal{D}_2$, or $c_2$ before $c_1$, in which case $c_2\in\mathcal{D}_1$. Therefore, property \ref{suggestion-agreement} holds.
+
+The map-agreement algorithm can be implemented by any state machine replication algorithm, like MultiPaxos~\cite{lamport2001paxos}, where a command $c$ is uniquely associated with a position in the sequence of consensus instances. %used to implementing map-agreement by uniquely associating commands to MultiPaxos instance numbers.
+However, MultiPaxos is too strong because we do not care about the ordering among instances.
+Instead, one can uniquely associate one incarnation of MultiPaxos with each process, where each process is initially the leader of its MultiPaxos incarnation.  
+We assume that a command is associated with a unique natural number $\opn{id}\left( c \right)$ and a process id $\opn{pid}\left( c \right)$, corresponding to the first process that received $c$.
+A process receiving a proposal $\opn{propose}_p\left( c, \mathcal{D}) $  proposes $ c\mapsto\mathcal{D} $ in instance $\opn{id}\left( c \right)$ of the MultiPaxos incarnation of process $\opn{pid}\left( c \right)$. Upon a MultiPaxos decision $ c\mapsto\mathcal{D'} $, $p$ calls $\opn{commit}_p\left( c,\mathcal{D} \right)$.
+Note that in a failure-free case, a command is committed in two message delays by its originator.
+
+EPaxos improves upon our MultiPaxos scheme in two ways. First, EPaxos uses Fast Paxos\cite{Lamport05GeneralizeConsensus} incarnations instead of MultiPaxos incarnations. Second, EPaxos combines the dependency-set algorithm outlined above, but using fast quorums, with the first phase of Fast Paxos: the state of the dependency-set algorithm and of the Fast Paxos incarnations are merged so as to allow the reception of identical dependency sets from a fast quorum of processes
+(after an $\opn{announce}_p\left( c \right)$) to act as a fast-path decision of Fast Paxos. 
+
+
+%A process receiving a proposal $ c\mapsto\mathcal{D} $ attaches a unique natural number $\opn{id}\left( c \right)$ as command identifier and its own id $\opn{pid}\left( c \right)$. proposes $ c\mapsto\mathcal{D} $ in instance $\opn{id}\left( c \right)$ of its MultiPaxos incarnation. Upon a MultiPaxos decision $ c\mapsto\mathcal{D'} $, $p$ commits $
+%c\mapsto\mathcal{D'} $. 
 
 \printbibliography%
 \begin{comment}
