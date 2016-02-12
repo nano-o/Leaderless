@@ -232,17 +232,16 @@ In practice, if commands are attached a unique identifier among a totally ordere
 %\textbf{Local dependency graph computed by a process.} 
 The local variable $cs_p$ of a process $p$ can be seen as describing a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the domain of $m_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ if and only both $c_1$ and $c_2$ are in $V\left( g_p \right)$ and $c_2 \in m_p\left[ c_1 \right]$ (i.e., $c_1$ depends on $c_2$). For example, if $cs_p = \left[ c_1 \mapsto \aset{c_2,c_3}, c_2 \mapsto \aset{c_1} \right]$ then $V\left(
 g_p \right) = \aset{c_1,c_2}$ and $E\left( g_p \right) = \aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right)}$.
+\todo{This is not accurate, see the TLA spec.}
 
 %\textbf{Orders induced by a graph.}
 A directed graph $g$ \emph{induces a partial order} $\preceq_g$ on its vertices defined such that $c_1 \preceq_g c_2$ iff there is a path from $c_1$ to $c_2$ and there is no path from $c_2$ to $c_1$.
 %Let $\opn{TOs}\left( g \right)$ be the set of total orders $o$ such that $\preceq_g \subseteq o$.
 For example, consider $h$ such that $V\left( h \right)=\aset{c_1,c_2,c_3,c_4}$ and $E\left( h \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right),\left( c_1,c_3 \right)}$. 
-We have that $\preceq_h = \aset{\left( c_1,c_3 \right)}$. % and $\opn{TOs}\left( h \right)$ is the set of all permutations of $\aseq{c_1,c_2,c_3,c_4}$ in which $c_1$ comes before $c_3$.
-If $c\in V\left( g \right)$, we write $\left[ c \right]_g$ for the strongly connected component of $g$ to which $c$ belongs. 
-%\textbf{Equivalence relation induced by a graph.}
-%A directed graph $g$ \emph{induces an equivalence relation} $\sim_g$ on its vertices defined such that $c_1 \sim_g c_2$ iff $c_1$ and $c_2$ belong to the same strongly connected component. We write $\left[ v \right]_g$ for the equivalence class of $v$ under $\sim_g$.
+We have that $\preceq_h = \aset{\left( c_1,c_3 \right)}$.
+%If $c\in V\left( g \right)$, we write $\left[ c \right]_g$ for the strongly connected component of $g$ to which $c$ belongs. 
 %\textbf{Linearizations of a dependency graph.}
-We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every pair of vertices $c_1,c_2\in V\left( g \right)$, $c_1 \preceq_g c_2$ implies $c_1 \ll c_2$, and if $c_1 \sim_g c_2$ and $ c_1 <_{\left[ c_1 \right]_g} c_2$ hold then $c_1 \ll c_2$. For example, assuming that $c_2 \leq_{\aset{c_1,c_2}} c_1$, the linearizations of $h$ are $\aseq{c_2,c_1,c_3,c_4}$, $\aseq{c_2,c_1,c_4,c_3}$, $\aseq{c_2,c_4,c_1,c_3}$, and $\aseq{c_4,c_2,c_1,c_3}$.
+We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every pair of vertices $c_1,c_2\in V\left( g \right)$, $c_1 \preceq_g c_2$ implies $c_1 \ll c_2$, and if $c_1$ and $c_2$ belong to the same strongly connected component $cs$ and $ c_1 <_{cs} c_2$ hold, then $c_1 \ll c_2$. For example, assuming that $c_2 \leq_{\aset{c_1,c_2}} c_1$, the linearizations of $h$ are $\aseq{c_2,c_1,c_3,c_4}$, $\aseq{c_2,c_1,c_4,c_3}$, $\aseq{c_2,c_4,c_1,c_3}$, and $\aseq{c_4,c_2,c_1,c_3}$.
 %\textbf{Partial order on graphs.}
 
 \begin{comment}
@@ -250,7 +249,7 @@ We now define a partial order on graphs. If $g_1$ and $g_2$ are two graphs, then
 For example, consider the graphs $h'$ and $h''$ such that $V\left( h' \right)=\aset{c_1,c_2,c_4}$, $E\left( h' \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right)}$, $V\left( h'' \right)=\aset{c_1,c_3,c_4}$, and $E\left( h'' \right)=\aset{\left( c_1,c_3 \right)}$. We have that $h'\leq h$, but $ h''\not\leq h$.
 \end{comment}
 
-Define the intersection of two graphs as $V\left( g_1 \cap g_2 \right)=V\left( g_1 \right)\cap V\left( g_2 \right)$ and $E\left( g_1 \cap g_2 \right)= E\left( g_1 \right)\cap E\left( g_2 \right)$, and define their union similarly.
+Define the intersection of two graphs such that $V\left( g_1 \cap g_2 \right)=V\left( g_1 \right)\cap V\left( g_2 \right)$ and $E\left( g_1 \cap g_2 \right)= E\left( g_1 \right)\cap E\left( g_2 \right)$, and define their union such that $V\left( g_1 \cup g_2 \right)=V\left( g_1 \right)\cup V\left( g_2 \right)$ and $E\left( g_1 \cup g_2 \right)= E\left( g_1 \right)\cup E\left( g_2 \right)$.
 Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$.
 
 \textbf{Lemma 1}
