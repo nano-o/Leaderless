@@ -31,9 +31,9 @@ Graphs(x) == UNION {[Vs -> SUBSET V] : Vs \in SUBSET V}
 (* Any vertices v not in the domain of g will not appear in G (even if     *)
 (* there is v2 where v \in g[v2]).                                         *)
 (***************************************************************************)
-ConvertGraph(G) ==
-    LET Vs == DOMAIN G
-        Es == UNION { {<<v1,v2>> : v2 \in (G[v1] \ {v1}) \cap Vs} : 
+ConvertGraph(g) ==
+    LET Vs == DOMAIN g
+        Es == UNION { {<<v1,v2>> : v2 \in (g[v1] \ {v1}) \cap Vs} : 
             v1 \in Vs}
     IN <<Vs, Es>>
    
@@ -271,7 +271,6 @@ THEOREM \A f \in LinFunsRec(SUBSET V) :
     \A R \in SUBSET (V \times V) :
         IsInterferenceRelation(R) => Safety2(f, R)
 
-
 Test(x) == 
     LET f == CHOOSE f \in LinFunsRec(SUBSET V) : TRUE
     IN  \A R \in SUBSET (V \times V) :
@@ -280,8 +279,8 @@ Test(x) ==
                 THEN \neg PrintT(<<g,R>>)
                 ELSE TRUE
             )
-    
+  
 =============================================================================
 \* Modification History
-\* Last modified Tue Feb 09 13:57:34 EST 2016 by nano
+\* Last modified Thu Feb 11 23:55:22 EST 2016 by nano
 \* Created Fri Feb 05 09:08:21 EST 2016 by nano
