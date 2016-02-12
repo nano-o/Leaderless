@@ -45,12 +45,12 @@ We prove that all the algorithms in the family are safe and live, and we have fo
 
 We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}. Each process receives proposals for commands of the form $\opn{Propose}(c)$, and must produce responses of the form $\opn{Decide}(\sigma)$, where $\sigma$ is a c-struct. 
 The sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties described below.
-We refer the reader to~\cite{Lamport05GeneralizeConsensus}, and we use the same notation, for the definition of c-structs and generalized consensus. Briefly, the c-structs are a set of elements, including $\bot$, with an operator $\bullet$ for appending commands to a c-struct. C-structs are partially ordered: $\sigma_1\sqsubseteq \sigma_2$ iff there exists a sequence of commands $cs$ such that $\sigma_2 = \sigma_1\bullet cs$ and $\bot\sqsubseteq \sigma$ for any
+We refer the reader to~\cite{Lamport05GeneralizeConsensus}, and we use the same notation, for the definition of c-structs and generalized consensus. Briefly, the c-structs are a set of elements, including $\bot$, with an operator $\bullet$ for appending commands to a c-struct. C-structs are partially ordered: $\sigma_1\sqsubseteq \sigma_2$ iff there exists a sequence of commands $\mathcal{C}$ such that $\sigma_2 = \sigma_1\bullet \mathcal{C}$ and $\bot\sqsubseteq \sigma$ for any
 $\sigma$. Two c-structs are compatible when they have a
 common upper bound. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands. The consistency property of generalized consensus requires that any two decided c-structs be compatible.
 
 We now present our abstract leaderless generalized consensus algorithm.
-A process $p$ receiving a command $c$ proceeds in three phases. First, it calls a \textit{dependency-set} sub-algorithm (\Cref{dep-algo}) to determine a set of commands $cs$ \todo{are we sure about the notation cs?} that the command $c$ may depend on. Second, the process $p$ proposes the mapping  $c\mapsto cs$ to a \textit{map-agreement} sub-algorithm (\Cref{map-algo}); the map-agreement sub-algorithm may subsequently commit a mapping $c\mapsto cs'$ for $c$, in which case $cs'$ becomes the set of dependencies of $c$, and we say that $c$ is executable when its dependency set is empty or when all its dependencies are executable. 
+A process $p$ receiving a command $c$ proceeds in three phases. First, it calls a \textit{dependency-set} sub-algorithm (\Cref{dep-algo}) to determine a set of commands $\mathcal{C}$ that the command $c$ may depend on. Second, the process $p$ proposes the mapping  $c\mapsto \mathcal{C}$ to a \textit{map-agreement} sub-algorithm (\Cref{map-algo}); the map-agreement sub-algorithm may subsequently commit a mapping $c\mapsto \mathcal{C}'$ for $c$, in which case $\mathcal{C}'$ becomes the set of dependencies of $c$, and we say that $c$ is executable when its dependency set is empty or when all its dependencies are executable. 
 Finally, when $c$ is executable, the process $p$ may execute $c$ by deciding the c-struct obtained by running the \emph{graph-processing} algorithm described in \Cref{abstract-algo}.
 Any other process can run the three phases independently of $p$ and eventually execute the command despite a crash of $p$.
 However, we show that a leaderless  generalized consensus algorithm is always safe and is live when its underlying dependency-set and map-agreement algorithms are safe and live.
@@ -227,8 +227,8 @@ Local variables: $m_p$, a map from commands to dependency sets, initially the em
 
 The graph processing algorithm is executed locally by a node (line 10 of \cref{fig:deps-set-algo3}). It must compute the value of $\opn{c-struct}\left( g_p \right)$, as defined in \cref{lindef}.
 Its key property is \cref{lemma1}. 
-We assume that processes initially agree, for each set of commands $cs$, on a total order $<_{cs}$ on $cs$.
-In practice, if commands are attached a unique identifier among a totally ordered set, $<_{cs}$ can be the restriction of this total order on $cs$.
+We assume that processes initially agree, for each set of commands $\mathcal{C}$, on a total order $<_{\mathcal{C}}$ on $\mathcal{C}$.
+In practice, if commands are attached a unique identifier among a totally ordered set, $<_{\mathcal{C}}$ can be the restriction of this total order on $\mathcal{C}$.
 
 %\textbf{Local dependency graph computed by a process.} 
 We say that a command $c$ in the domain of $m_p$ is \emph{complete} when no command $c$ which is not in the domain of $m_p$ can be reached from $c$ by recursively following $c$'s dependencies.
@@ -241,7 +241,7 @@ For example, consider $h$ where $V\left( h \right)=\aset{c_1,c_2,c_3,c_4}$ and $
 We have that $\preceq_h = \aset{\left( c_1,c_3 \right)}$.
 %If $c\in V\left( g \right)$, we write $\left[ c \right]_g$ for the strongly connected component of $g$ to which $c$ belongs. 
 %\textbf{Linearizations of a dependency graph.}
-We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every $c_1,c_2\in V\left( g \right)$, $c_1 \preceq_g c_2$ implies $c_1 \ll c_2$, and if $c_1$ and $c_2$ belong to the same strongly connected component $cs$ and $ c_1 <_{cs} c_2$ hold, then $c_1 \ll c_2$. For example, assuming that $c_2 \leq_{\aset{c_1,c_2}} c_1$, the linearizations of $h$ are $\aseq{c_2,c_1,c_3,c_4}$, $\aseq{c_2,c_1,c_4,c_3}$, $\aseq{c_2,c_4,c_1,c_3}$, and $\aseq{c_4,c_2,c_1,c_3}$.
+We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every $c_1,c_2\in V\left( g \right)$, $c_1 \preceq_g c_2$ implies $c_1 \ll c_2$, and if $c_1$ and $c_2$ belong to the same strongly connected component $\mathcal{C}$ and $ c_1 <_{\mathcal{C}} c_2$ hold, then $c_1 \ll c_2$. For example, assuming that $c_2 \leq_{\aset{c_1,c_2}} c_1$, the linearizations of $h$ are $\aseq{c_2,c_1,c_3,c_4}$, $\aseq{c_2,c_1,c_4,c_3}$, $\aseq{c_2,c_4,c_1,c_3}$, and $\aseq{c_4,c_2,c_1,c_3}$.
 %\textbf{Partial order on graphs.}
 
 \begin{comment}
@@ -271,7 +271,7 @@ By lemma 1.b, $\opn{c-struct}\left( m_p \right)$ is well-defined.
 \textbf{Graph of strongly connected components.} Given a graph $g$, let $\hat{g}$ be the graph whose vertices are the strongly connected components of $g$ (represented as sets of vertices) and where there is an edge from $g_1$ to $g_2$ if and only if there are two vertices $v_1$ and $v_2$ of $g$ such that $v_1 \in V\left( g_1 \right)$, $v_2 \in V\left( g_2 \right)$, and $\left( v_1,v_2 \right)\in E\left( g \right)$. Note that the reflexive and transitive closure of $V\left(  \hat{g} \right)$ is necessarily a partial order. 
 For example, consider $h$ such that $V\left( h \right)=\aset{c_1,c_2,c_3,c_4}$ and $E\left( h \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right),\left( c_1,c_3 \right)}$. Then $V(\hat{h}) = \aset{\aset{c_1,c_2},\aset{c_3},\aset{c_4}}$ and $E( \hat{h} )=\aset{\left( \aset{c_1,c_2},\aset{c_3} \right)}$. We will use $h$ as an example in the rest of the section.
 
-\textbf{Linearization function.} Consider a function $f$ mapping sets of commands to sequences of commands such that $f\left[ cs \right]$ is a total order on the set $cs$.
+\textbf{Linearization function.} Consider a function $f$ mapping sets of commands to sequences of commands such that $f\left[ \mathcal{C} \right]$ is a total order on the set $\mathcal{C}$.
 
 \textbf{Linearizations of a dependency graph.}
 When $\hat{o}$ is a total order over the strongly connected components of $g$ such that $\hat{o} \in \opn{TOs}\left( \hat{g} \right)$, we say that a total order $l$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when $\left(v_1,v_2\right) \in l$ iff (1) there exists $vs_1,vs_2\in V\left(\hat{g}\right)$ such that $v_1\in vs_1$, $v_2\in vs_2$, and $\left( vs_1,vs_2 \right)\in \hat{o}$, or (2) there exists $vs_1\in V\left(\hat{g}\right)$ such that
@@ -286,7 +286,7 @@ Define $\opn{Lin}_g\left( \leq \right) = f\left[ V_1 \right] \cdot F\left[ V_2 \
 
 Define the set of linearizations $\opn{Lins}\left( g \right)$ of a graph $g$ as the set of sequences whose length is the cardinality of $V\left( g \right)$, which contain each element of $V\left( g \right)$ exactly once, and ... \todo{or first define the partial order induced by a graph and then its compatible total orders.}
 
-Consider a function $f$ mapping sets of commands to sequences of commands such that $f\left[ cs \right]$ contains each command in $cs$ exactly once.
+Consider a function $f$ mapping sets of commands to sequences of commands such that $f\left[ \mathcal{C} \right]$ contains each command in $\mathcal{C}$ exactly once.
 A sequence of commands $cseq$ is an $f$-linearization of the graph $g$ if and only there is a sequence whose element of strongly connected 
 
 \todo{Explain the graph processing algo independently? Its key property is that when $G1 \subseteq G2$ then $lin\left( c_1,G1 \right)$ is a prefix of $lin\left( c_2,G2 \right)$ or vice-versa.}
@@ -317,11 +317,11 @@ If $m_p\subseteq m_q$
 
 A c-struct set is a set containing the element $\bot$ and with an append operator $\bullet$ such that $\sigma \bullet c$ is a c-struct, for any c-struct $\sigma$ and command $c$. 
 We also write the $\sigma\bullet\aseq{c_1,\cdots,c_n}$ for the c-struct $\sigma\bullet c_1\bullet\cdots\bullet c_n$.
-C-structs are partially ordered by the relation $\sqsubseteq$ defined such that $\sigma_1\sqsubseteq\sigma_2$ iff there exists a sequence of commands $cs$ such that $\sigma_2=\sigma_1\bullet cs$. Two c-structs are compatible when they have a common upper bound; when this is the case, two c-structs $\sigma_1$ and $\sigma_2$ have a least upper bound, noted $\bigsqcup\left( \sigma_1,\sigma_2 \right)$.
+C-structs are partially ordered by the relation $\sqsubseteq$ defined such that $\sigma_1\sqsubseteq\sigma_2$ iff there exists a sequence of commands $\mathcal{C}$ such that $\sigma_2=\sigma_1\bullet \mathcal{C}$. Two c-structs are compatible when they have a common upper bound; when this is the case, two c-structs $\sigma_1$ and $\sigma_2$ have a least upper bound, noted $\bigsqcup\left( \sigma_1,\sigma_2 \right)$.
 We say that two commands \textit{commute} when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands (see~\cite{Lamport05GeneralizeConsensus} for a complete discussion on c-struct). 
 In the rest of the paper the symbol $c$, possibly sub-scripted, ranges over commands, and the symbol $\mathcal{D}$, possibly sub-scripted, ranges over sets of commands.
 
-We can now state the generalized-consensus properties: non-triviality requires that any decided c-struct be of the form $\bot\bullet cs$, where $cs$ is a sequence of proposed commands; consistency requires than any two decided c-structs $\sigma_1$ and $\sigma_2$ be compatible; stability requires that when a process $p$ decides a c-struct $\sigma_1$ and time $t_1$ and $\sigma_2$ at time $t_2$, then $t_1 \leq t_2$ implies that $\sigma_1\sqsubseteq \sigma_2$; finally, liveness requires that
+We can now state the generalized-consensus properties: non-triviality requires that any decided c-struct be of the form $\bot\bullet \mathcal{C}$, where $\mathcal{C}$ is a sequence of proposed commands; consistency requires than any two decided c-structs $\sigma_1$ and $\sigma_2$ be compatible; stability requires that when a process $p$ decides a c-struct $\sigma_1$ and time $t_1$ and $\sigma_2$ at time $t_2$, then $t_1 \leq t_2$ implies that $\sigma_1\sqsubseteq \sigma_2$; finally, liveness requires that
 if a command keeps beeing proposed, then a c-struct $\sigma$ containing the command is eventually decided.
 
 \end{document}
