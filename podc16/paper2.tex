@@ -45,8 +45,9 @@ We prove that all the algorithms in the family are safe and live, and we have fo
 
 We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}. Each process receives proposals for commands of the form $\opn{Propose}(c)$, and must produce responses of the form $\opn{Decide}(\sigma)$, where $\sigma$ is a c-struct. 
 The sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties described below.
-We refer the reader to~\cite{Lamport05GeneralizeConsensus} for the definition of c-structs and generalized consensus. Note that we use exactly the same notation.
-
+We refer the reader to~\cite{Lamport05GeneralizeConsensus}, and we use the same notation, for the definition of c-structs and generalized consensus. Briefly, the c-structs are a set of elements, including $\bot$, with an operator $\bullet$ for appending commands to a c-struct. C-structs are partially ordered: $\sigma_1\sqsubseteq \sigma_2$ iff there exists a sequence of commands $cs$ such that $\sigma_2 = \sigma_1\bullet cs$ and $\bot\sqsubseteq \sigma$ for any
+$\sigma$. Two c-structs are compatible when they have a
+common upper bound. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands. The consistency property of generalized consensus requires that any two decided c-structs be compatible.
 
 We now present our abstract leaderless generalized consensus algorithm.
 A process $p$ receiving a command $c$ proceeds in three phases. First, it calls a \textit{dependency-set} sub-algorithm (\Cref{dep-algo}) to determine a set of commands $cs$ \todo{are we sure about the notation cs?} that the command $c$ may depend on. Second, the process $p$ proposes the mapping  $c\mapsto cs$ to a \textit{map-agreement} sub-algorithm (\Cref{map-algo}); the map-agreement sub-algorithm may subsequently commit a mapping $c\mapsto cs'$ for $c$, in which case $cs'$ becomes the set of dependencies of $c$, and we say that $c$ is executable when its dependency set is empty or when all its dependencies are executable. 
@@ -202,7 +203,7 @@ Moreover, a map-agreement algorithm must ensure that:
 
 \end{enumerate}
 
-An example of implementation of the map-agreement algorithm can be any state machine replication algorithm, like MultiPaxos~\cite{paxos-made-simple}, where a pair of command $c$ and dependency-set $\mathcal{D}$ can be proposed to a instance of MultiPaxos that is identified by the command $c$ itself.
+An example of implementation of the map-agreement algorithm can be any state machine replication algorithm, like MultiPaxos~\cite{lamport2001paxos}, where a pair of command $c$ and dependency-set $\mathcal{D}$ can be proposed to a instance of MultiPaxos that is identified by the command $c$ itself.
 %used to implementing map-agreement by uniquely associating commands to MultiPaxos instance numbers.
 
 
@@ -256,7 +257,7 @@ Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ 
 Assume that $g_1$ and $g_2$ are two dependency graphs, 
 that for every pair of non-commutative commands $c_1,c_2 \in V\left(g_2\right)$, either $\left( c_1,c_2 \right)\in E\left( g_2 \right)$ or $\left( c_2,c_1 \right)\in E\left( g_2 \right)$,
 that $g_1$ and $g_2$ are compatible,
-and that $l_1$ is a linearization of $g_1$ and $l_2$ is a linearization of $g_2$. 
+that $l_1$ is a linearization of $g_1$, and that $l_2$ is a linearization of $g_2$. 
 Then we have (a), $\bot\bullet l_1$ and $\bot\bullet l_2$ are compatible c-structs, and (b), if $g_1 = g_2$ then $\bot\bullet l_1 = \bot\bullet l_2$.
 
 \textbf{Definition 1}
