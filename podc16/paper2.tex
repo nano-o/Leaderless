@@ -49,14 +49,12 @@ We refer the reader to~\cite{Lamport05GeneralizeConsensus}, and we use the same 
 $\sigma$. Two c-structs are compatible when they have a
 common upper bound. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands. The consistency property of generalized consensus requires that any two decided c-structs be compatible.
 
-We now present our abstract leaderless generalized consensus algorithm.
+Our leaderless generalized consensus algorithm orchestrates a dependency-set sub-algorithm and map-agreement sub-algorithm as shown in \cref{fig:deps-set-algo3}.
 A process $p$ receiving a command $c$ proceeds in three phases. First, it calls a \textit{dependency-set} sub-algorithm (\Cref{dep-algo}) to determine a set of commands $\mathcal{D}$ that the command $c$ may depend on. Second, $p$ proposes the mapping  $c\mapsto \mathcal{D}$ to a \textit{map-agreement} sub-algorithm (\Cref{map-algo}); the map-agreement sub-algorithm may subsequently commit a mapping $c\mapsto \mathcal{D}'$ for $c$, in which case $\mathcal{D}'$ becomes the dependency set of $c$;
 we say that $c$ is executable when all its transitive dependencies are known. %no command $c'$ for which no mapping has been committed is reachable from $c$ by recursively following committed mappings. 
-\todo{Change the name of the the decide action to commit.}
 Finally, when $c$ is executable, the $p$ may execute $c$ by deciding the c-struct obtained by \emph{locally} running a \emph{graph-processing} algorithm described in \Cref{abstract-algo}.
 Any other process can run the three phases independently of $p$ and eventually execute the command despite a crash of $p$.
 However, we show that a leaderless  generalized consensus algorithm is always safe and is live when its underlying dependency-set and map-agreement algorithms are safe and live.
-The leaderless generalized consensus algorithm orchestrates the two dependency-set and map-agreement sub-algorithms as shown in \cref{fig:deps-set-algo3}.\todo{This pseudocode must be in figure (a). Also we have to better describe the pseudocode.}
 
 %In the next sections we present our specification of leaderless generalized consensus algorithms, which is parameterized over a \textit{dependency-set} algorithm (\Cref{dep-algo}) and a \textit{map-agreement} algorithm (\Cref{map-algo}). 
 
@@ -64,20 +62,47 @@ The leaderless generalized consensus algorithm orchestrates the two dependency-s
 \subsection{Computing Dependency-Sets}
 \label{dep-algo}
 
-A dependency-set algorithm exposes the input interface $\opn{announce}_p\left( c \right)$, to announce a command $c$, the output interface $\opn{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, and \todo{this is not clear: an input interface $\opn{commit}\left( c,\mathcal{D} \right)$ (meant to receive inputs from the agreement sub-algorithm)}, where $p\in P$ is the process executing the call.
+A dependency-set algorithm exposes the input interface $\opn{announce}_p\left( c \right)$, to announce a command $c$, the output interface $\opn{suggest}_p \left( c,\mathcal{D}\right)$, to suggest a set of dependencies $\mathcal{D}$ for $c$, and an input interface $\opn{commit}\left( c,\mathcal{D} \right)$ (meant to observe the map-agreement sub-algorithm), where $p\in P$ is the process executing the call.
 Moreover, a dependency-set algorithm must ensure that:
-\begin{enumerate}[noitemsep,nolistsep]
-    \item For any suggestion $\opn{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before.
-    \item For any two suggestions $\opn{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\opn{suggest}_q \left( c_2,\mathcal{D}_2\right)$ (with $p$ possibly equal to $q$), if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
-    \item If a suggestion $\opn{suggest}_p(c,\mathcal{D})$ has been made and no input $\opn{commit}_q\left( c,\mathcal{D'} \right)$ is observed, then eventually a new suggestion $\opn{suggest}_r\left( c,\mathcal{D''} \right)$ for $r\neq p$ is made.
-\end{enumerate}
-
-An example of implementation of such an algorithm is depicted by the pseudocode of Figures~\ref{fig:deps-set-algo1} and~\ref{fig:deps-set-algo2}. The idea is to let every process broadcast $c$ to all the processes in the system, in order to announce $c$ (lines \ref{alg:announce}--\ref{alg:send-new-cmd}). Then whenever a process $p$ receives $c$, it replies to the sender with the set $\mathcal{D}$ of commands that $p$ has observed so far, and such that $c$ and any command in $\mathcal{D}$ do not commute (lines \ref{alg:receive-new-cmd}--\ref{alg:send-deps}). Afterwards, the process announcing $c$ collects the sets $\mathcal{D}$ for $c$ from a \textit{quorum} of $\mathcal{Q}$ processes, and it locally suggests the union of those sets as final dependency-set for $c$ (lines \ref{alg:receive-deps}--\ref{alg:call-suggest}). For the purpose of this example we allow for $\mathcal{Q}$ to be equal to any positive integer that is not greater than the number of processes, as long as the following requirement is met: the intersection of any two quorums that are selected by processes to collect the sets of dependencies is not empty.
-
-The provided implementation satisfies the specification of a dependency-set algorithm for the following reasons. Since any command in a dependency-set that is suggested by a process (lines~\ref{alg:update-deps-p} and~\ref{alg:call-suggest}) must be in the set $cmds_q$ of the commands received by some process $q$ (line~\ref{alg:update-d}), and a process receives a command if and only if there exists some process that previously announced the command (line~\ref{alg:send-new-cmd}), then it follows that any command in any suggested dependency-set has been previously announced. Further, since a process can suggest a set of dependencies $deps_p[c]$ for a command $c$ after it has received a reply for $c$ from at least a quorum of processes (lines~\ref{alg:receive-deps}--\ref{alg:call-suggest}), we have that $\opn{suggest}_p \left( c,deps_p[c]\right)$ is called only if a quorum of processes $q$ have $c$ in their $cmds_q$ (line~\ref{alg:update-cmds-p}). Therefore, by the requirement that we enforced on the quorums, we can conclude that for any two suggestions $\opn{suggest}_p \left( c_1,deps_p[c_1]\right)$ and $\opn{suggest}_q \left( c_2,deps_q[c_2]\right)$,  if $c_1$ and $c_2$ do not commute then either $c_1\in deps_q[c_2]$ or $c_2 \in deps_p[c_1]$.
+\begin{itemize}[noitemsep,nolistsep]
+    \item[-] Safety: (a) For any suggestion $\opn{suggest}_p \left( c,\mathcal{D}\right)$, every command in $\{c\}\cup \mathcal{D}$ must have been announced before, and (b), for any two suggestions $\opn{suggest}_p \left( c_1,\mathcal{D}_1\right)$ and $\opn{suggest}_q \left( c_2,\mathcal{D}_2\right)$, if $c_1$ and $c_2$ do not commute then either $c_1\in \mathcal{D}_2$ or $c_2 \in \mathcal{D}_1$.
+%    \item If $c$ was announced by $p$, then eventually a dependency set is suggested for $c$ to $p$.
+    \item[-] Liveness: (a) If a suggestion $\opn{suggest}_p\left( c \right)$ was made, then eventually a suggestion $\opn{suggest}\left( c,\mathcal{D} \right)_p$ is made, and (b), if a suggestion $\opn{suggest}_p(c,\mathcal{D})$ has been made and no input $\opn{commit}_q\left( c,\mathcal{D'} \right)$ is observed, then eventually a new suggestion $\opn{suggest}_r\left( c,\mathcal{D''} \right)$ for $r\neq p$ is made.
+\end{itemize}
+\vspace{5cm}
 
 \begin{figure*}
 \centering
+\subfigure[Leaderless generalized consensus implementation.]{
+\noindent\fbox{%
+	\begin{varwidth}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+ 
+    
+		\begin{algorithmic}[1]
+			{\scriptsize
+			\START[$\opn{init}_p$]{{\bf upon}}{$()$}
+			\State $m_p\gets \emptyset$
+			\State $\sigma_p\gets \bot$
+			\END
+			\START[$\opn{GC-propose}_p$]{{\bf upon}}{$(c)$}
+			\State {\bf call} $\opn{announce}_p\left( c \right)$
+			\END
+			\Statex
+			\START[$\opn{suggest}_p$]{{\bf upon}}{$(c,\mathcal{D})$}
+			\State  $\opn{propose}_p( c,\mathcal{D})$ 			
+			\END
+			\Statex
+			\START[$\opn{commit}_p$]{{\bf upon}}{$(c,\mathcal{D})$}
+			\State  $m_p \gets m_p \oplus \left[ c \mapsto \mathcal{D}\right]$	
+			\State $\sigma_p \gets  \opn{c-struct}\left(m_p\right)$
+			\State $\opn{GC-decide}_p(\sigma_p)$		
+			\END
+			}
+		\end{algorithmic}
+	\end{varwidth}%
+}
+\label{fig:deps-set-algo3}
+}
 \subfigure[$\texttt{init}_p$ and $\texttt{announce}_p$ implementations.]{
 \noindent\fbox{%
 	\begin{varwidth}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
@@ -133,36 +158,6 @@ The provided implementation satisfies the specification of a dependency-set algo
 }
 \label{fig:deps-set-algo2}
 }
-\hspace*{0.1in}\subfigure[Leaderless generalized consensus implementation.]{
-\noindent\fbox{%
-	\begin{varwidth}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
- 
-    
-		\begin{algorithmic}[1]
-			{\scriptsize
-			\START[$\opn{init}_p$]{{\bf upon}}{$()$}
-			\State $m_p\gets \emptyset$
-			\State $\sigma_p\gets \bot$
-			\END
-			\START[$\opn{GC-propose}_p$]{{\bf upon}}{$(c)$}
-			\State {\bf call} $\opn{announce}_p\left( c \right)$
-			\END
-			\Statex
-			\START[$\opn{suggest}_p$]{{\bf upon}}{$(c,\mathcal{D})$}
-			\State  $\opn{propose}_p( c,\mathcal{D})$ 			
-			\END
-			\Statex
-			\START[$\opn{commit}_p$]{{\bf upon}}{$(c,\mathcal{D})$}
-			\State  $m_p \gets m_p \oplus \left[ c \mapsto \mathcal{D}\right]$	
-			\State $\sigma_p \gets  \opn{c-struct}\left(m_p\right)$
-			\State $\opn{GC-decide}_p(\sigma_p)$		
-			\END
-			}
-		\end{algorithmic}
-	\end{varwidth}%
-}
-\label{fig:deps-set-algo3}
-}
 \caption{Example of dependency-set algorithm and leaderless generalized consensus implementations.}
 \label{fig:deps-set-algo}
 \end{figure*}
@@ -186,15 +181,6 @@ Any implementation of dependency-set algorithm can rely on the garbage collectio
 
 A map-agreement algorithm exposes the input interface $\opn{propose}_p\left( c, \mathcal{D} \right)$, to propose a set of dependencies $\mathcal{D}$ for a command $c$, and the output interface $\opn{commit}_p\left( c, \mathcal{D} \right)$, to commit $\mathcal{D}$ for $c$, where $p\in P$ is the process executing the call.
 Moreover, a map-agreement algorithm must ensure that: 
-\begin{comment}
-\begin{enumerate}[noitemsep,nolistsep]
-    \item If the set of dependencies $\mathcal{D}$ is committed for a command $c$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
-    \item If $\mathcal{D}_1$ is committed for a command $c$ and $\mathcal{D}_2$ is committed for the same command $c$, then $\mathcal{D}_1$ is equal to $\mathcal{D}_2$.
- \end{enumerate}
-
-\todo{OR MORE FORMALLY}
-
-\end{comment}
 
 \begin{enumerate}[noitemsep,nolistsep]
     \item For any decision $\opn{commit}_p\left( c, \mathcal{D} \right)$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
@@ -205,11 +191,6 @@ Moreover, a map-agreement algorithm must ensure that:
 
 An example of implementation of the map-agreement algorithm can be any state machine replication algorithm, like MultiPaxos~\cite{lamport2001paxos}, where a pair of command $c$ and dependency-set $\mathcal{D}$ can be proposed to a instance of MultiPaxos that is identified by the command $c$ itself.
 %used to implementing map-agreement by uniquely associating commands to MultiPaxos instance numbers.
-
-
-
-
-\todo{Cite Generalized Paxos as an example for bounding the data structures. Problem: we do not describe any particular data structure here. It is not clear why we should write about GC here.}
 
 \subsection{Processing the Dependency Graph}
 \label{abstract-algo}
@@ -323,5 +304,12 @@ In the rest of the paper the symbol $c$, possibly sub-scripted, ranges over comm
 
 We can now state the generalized-consensus properties: non-triviality requires that any decided c-struct be of the form $\bot\bullet \mathcal{D}$, where $\mathcal{D}$ is a sequence of proposed commands; consistency requires than any two decided c-structs $\sigma_1$ and $\sigma_2$ be compatible; stability requires that when a process $p$ decides a c-struct $\sigma_1$ and time $t_1$ and $\sigma_2$ at time $t_2$, then $t_1 \leq t_2$ implies that $\sigma_1\sqsubseteq \sigma_2$; finally, liveness requires that
 if a command keeps beeing proposed, then a c-struct $\sigma$ containing the command is eventually decided.
+
+\subsection{Description map-agreement implementation}
+
+An example of implementation of such an algorithm is depicted by the pseudocode of Figures~\ref{fig:deps-set-algo1} and~\ref{fig:deps-set-algo2}. The idea is to let every process broadcast $c$ to all the processes in the system, in order to announce $c$ (lines \ref{alg:announce}--\ref{alg:send-new-cmd}). Then whenever a process $p$ receives $c$, it replies to the sender with the set $\mathcal{D}$ of commands that $p$ has observed so far, and such that $c$ and any command in $\mathcal{D}$ do not commute (lines \ref{alg:receive-new-cmd}--\ref{alg:send-deps}). Afterwards, the process announcing $c$ collects the sets $\mathcal{D}$ for $c$ from a \textit{quorum} of $\mathcal{Q}$ processes, and it locally suggests the union of those sets as final dependency-set for $c$ (lines \ref{alg:receive-deps}--\ref{alg:call-suggest}). For the purpose of this example we allow for $\mathcal{Q}$ to be equal to any positive integer that is not greater than the number of processes, as long as the following requirement is met: the intersection of any two quorums that are selected by processes to collect the sets of dependencies is not empty.
+
+The provided implementation satisfies the specification of a dependency-set algorithm for the following reasons. Since any command in a dependency-set that is suggested by a process (lines~\ref{alg:update-deps-p} and~\ref{alg:call-suggest}) must be in the set $cmds_q$ of the commands received by some process $q$ (line~\ref{alg:update-d}), and a process receives a command if and only if there exists some process that previously announced the command (line~\ref{alg:send-new-cmd}), then it follows that any command in any suggested dependency-set has been previously announced. Further, since a process can suggest a set of dependencies $deps_p[c]$ for a command $c$ after it has received a reply for $c$ from at least a quorum of processes (lines~\ref{alg:receive-deps}--\ref{alg:call-suggest}), we have that $\opn{suggest}_p \left( c,deps_p[c]\right)$ is called only if a quorum of processes $q$ have $c$ in their $cmds_q$ (line~\ref{alg:update-cmds-p}). Therefore, by the requirement that we enforced on the quorums, we can conclude that for any two suggestions $\opn{suggest}_p \left( c_1,deps_p[c_1]\right)$ and $\opn{suggest}_q \left( c_2,deps_q[c_2]\right)$,  if $c_1$ and $c_2$ do not commute then either $c_1\in deps_q[c_2]$ or $c_2 \in deps_p[c_1]$.
+
 
 \end{document}
