@@ -255,21 +255,22 @@ Consider an execution of the algorithm.
 If $g_p^1$ is the graph $g_p$ at time $t_1$, $g_q^2$ is the graph $g_q$ at time $t_2$, then $g_p^1$ and $g_q^2$ are compatible.
 \end{mylemma}
 \begin{proof*}
-Follows from the safety property (b) of the map-agreement algorithm and definition of the graph $g_p$.
-From (b) it follows that if $c$ is in the domain of both $m_p$ and $m_q$ then $m_p\left[ c \right] = m_q\left[ c \right]$.
+TODO
+%Follows from the safety property (b) of the map-agreement algorithm and definition of the graph $g_p$.
+%From (b) it follows that if $c$ is in the domain of both $m_p$ and $m_q$ then $m_p\left[ c \right] = m_q\left[ c \right]$.
 \end{proof*}
 \begin{mythm}
-    The consistency property always holds.
+    The consistency property of generalized consensus always holds.
     \label{lemma:consistency}
 \end{mythm}
 \begin{proof*}
-    By \cref{lemma:compat} and the safety property (b) of the dependency-set algorithm, $g_p^1$ and $g_q^2$ satisfy the premises of \cref{lemma:graph}. Therefore we get that $g_p^1$ and $g_q^2$ are compatible.
+    By \cref{lemma:compat} and \ref{suggestion-agreement}, $g_p^1$ and $g_q^2$ satisfy the premises of \cref{lemma:graph}. Therefore we get that $g_p^1$ and $g_q^2$ are compatible.
 \end{proof*}
 \begin{mythm}
     If a command $c$ which is GC-proposed is then repeatedly GC-proposed, then a c-struct containing $c$ is eventually decided.
 \end{mythm}
 \begin{proof*}
-    The liveness properties (a) and (b) of the dependency-set algorithm ensures that some dependency sets are repeatedly proposed for $c$ to the map-agreement algorithm, as long as a commit is not observed. Moreover, the map-agreement algorithm ensures that when dependency sets are repeatedly proposed for $c$, then a dependency set will eventually be committed for $c$. Similarly, any dependency of $c$ is eventually committed and $c$ becomes executable, at which points it is included in the next decided c-struct.
+    The properties \ref{eventual-suggestion} and \ref{re-suggest} ensure that dependency sets are repeatedly proposed for $c$ to the map-agreement algorithm as long as a commit is not observed. Moreover, the map-agreement algorithm ensures that when dependency sets are repeatedly proposed for $c$, then a dependency set will eventually be committed for $c$. Similarly, any dependency of $c$ is eventually committed and $c$ becomes executable, at which points it is included in the next decided c-struct.
 \end{proof*}
 
 
