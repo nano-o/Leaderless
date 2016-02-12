@@ -241,21 +241,20 @@ If $c\in V\left( g \right)$, we write $\left[ c \right]_g$ for the strongly conn
 We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every pair of vertices $c_1,c_2\in V\left( g \right)$, $c_1 \preceq_g c_2$ implies $c_1 \ll c_2$, and if $c_1 \sim_g c_2$ and $ c_1 <_{\left[ c_1 \right]_g} c_2$ hold then $c_1 \ll c_2$. For example, assuming that $c_2 \leq_{\aset{c_1,c_2}} c_1$, the linearizations of $h$ are $\aseq{c_2,c_1,c_3,c_4}$, $\aseq{c_2,c_1,c_4,c_3}$, $\aseq{c_2,c_4,c_1,c_3}$, and $\aseq{c_4,c_2,c_1,c_3}$.
 %\textbf{Partial order on graphs.}
 
+\begin{comment}
 We now define a partial order on graphs. If $g_1$ and $g_2$ are two graphs, then we write $g_1 \leq g_2$ iff $V\left( g_1 \right)\subseteq V\left( g_2 \right)$, and if $v\in V\left( g_1 \right)$, $e\in E\left( g_2 \right)$, and $v$ is an endpoint of $e$, then $e\in E\left( g_1 \right)$. 
 For example, consider the graphs $h'$ and $h''$ such that $V\left( h' \right)=\aset{c_1,c_2,c_4}$, $E\left( h' \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right)}$, $V\left( h'' \right)=\aset{c_1,c_3,c_4}$, and $E\left( h'' \right)=\aset{\left( c_1,c_3 \right)}$. We have that $h'\leq h$, but $ h''\not\leq h$.
+\end{comment}
 
-\todo{Partial orders may not be what we need (see Lemma 2), instead:}
 Define the intersection of two graphs as $V\left( g_1 \cap g_2 \right)=V\left( g_1 \right)\cap V\left( g_2 \right)$ and $E\left( g_1 \cap g_2 \right)= E\left( g_1 \right)\cap E\left( g_2 \right)$, and define their union similarly.
-Two graphs $g_1$ and $g_2$ are \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$.
-\todo{Does this make any sense?}
+Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$.
 
 \textbf{Lemma 1}
-Assume that: $g_1$ and $g_2$ are two dependency graphs; 
-for every pair of non-commutative commands $c_1,c_2 \in V\left(g_2\right)$, either $\left( c_1,c_2 \right)\in E\left( g_2 \right)$ or $\left( c_2,c_1 \right)\in E\left( g_2 \right)$;
-$g_1 \leq g_2$; \todo{Instead of the previous one: $g_1$ and $g_2$ are compatible};
-$l_1$ is a linearization of $g_1$ and $l_2$ is a linearization of $g_2$. 
-Then we have (a), $\bot\bullet l_1 \sqsubseteq \bot\bullet l_2$, and (b), if $g_1 = g_2$ then $\bot\bullet l_1 = \bot\bullet l_2$.
-\todo{No, then we have that $\bot\bullet l_1$ and $\bot\bullet l_2$ are compatible.}
+Assume that $g_1$ and $g_2$ are two dependency graphs, 
+that for every pair of non-commutative commands $c_1,c_2 \in V\left(g_2\right)$, either $\left( c_1,c_2 \right)\in E\left( g_2 \right)$ or $\left( c_2,c_1 \right)\in E\left( g_2 \right)$,
+that $g_1$ and $g_2$ are compatible,
+and that $l_1$ is a linearization of $g_1$ and $l_2$ is a linearization of $g_2$. 
+Then we have (a), $\bot\bullet l_1$ and $\bot\bullet l_2$ are compatible c-structs, and (b), if $g_1 = g_2$ then $\bot\bullet l_1 = \bot\bullet l_2$.
 
 \textbf{Definition 1}
 We define $\opn{c-struct}\left( m_p \right) = \bot\bullet l$ where $l$ is a linearization of $g_p$.
@@ -290,18 +289,18 @@ A sequence of commands $cseq$ is an $f$-linearization of the graph $g$ if and on
 \end{comment}
 
 \subsection{Consistency and Liveness}
-\textbf{Lemma 2}
-If $g_p^1$ is the graph $g_p$ at time $t_1$, $g_q^2$ is the graph $g_q$ at time $t_2$, and $t_1 \leq t_2$, then $g_p^1 \leq g_q^2$.
-\todo{This is wrong\ldots
-What about: If $g_p^1$ is the graph $g_p$ at time $t_1$, $g_q^2$ is the graph $g_q$ at time $t_2$, then $g_p^1$ and $g_q^2$ are compatible.}
 
+\textbf{Lemma 2}
+If $g_p^1$ is the graph $g_p$ at time $t_1$, $g_q^2$ is the graph $g_q$ at time $t_2$, then $g_p^1$ and $g_q^2$ are compatible.
+
+\begin{comment}
 \textbf{Lemma 3}
 Consider $g_1$ and $g_2$. Assume that if $v\in V\left( g_1 \right)$ and $v\in V\left( g_2 \right)$ then $n\left( g_1 \right)=n\left( g2 \right)$.
 
 \textbf{Lemma 4}
 If $m_p\subseteq m_q$
 
-
+\end{comment}
 
 \subsection{Obtaining EPaxos}
 
