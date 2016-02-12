@@ -215,7 +215,7 @@ For example, consider the graphs $h'$ and $h''$ such that $V\left( h' \right)=\a
 \end{comment}
 
 Define graph intersection such that $V\left( g_1 \cap g_2 \right)=V\left( g_1 \right)\cap V\left( g_2 \right)$ and $E\left( g_1 \cap g_2 \right)= E\left( g_1 \right)\cap E\left( g_2 \right)$, and graph union such that $V\left( g_1 \cup g_2 \right)=V\left( g_1 \right)\cup V\left( g_2 \right)$ and $E\left( g_1 \cup g_2 \right)= E\left( g_1 \right)\cup E\left( g_2 \right)$.
-Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$ ($g$ is a vertex-induced subgraph of $g'$ iff $V\left( g \right)\subseteq V\left( g' \right)$ and if both endpoints of $e\in E\left( g' \right)$ are in $V\left( g \right)$, then $e\in E\left( g \right)$).
+Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$ ($g$ is a vertex-induced subgraph of $g'$ iff $V\left( g \right)\subseteq V\left( g' \right)$, and for every $e\in E\left( g' \right)$, if both endpoints of $e$ are in $V\left( g \right)$, then $e\in E\left( g \right)$).
 
 \begin{mylemma}\label{lemma:graph}
 Assume that $g_1$ and $g_2$ are two dependency graphs, 
