@@ -176,9 +176,9 @@ An example of implementation of such an algorithm is depicted by the pseudocode 
   %  \item If the dependency set $d_1$ has been suggested for the command $c_1$, the dependency set $d_2$ has been suggested for the command $c_2$, and $c_1$ and $c_2$ do not commute, then either $c_1\in d_2$ or $c_2 \in d_1$.
 %\end{enumerate}
 
-Any implementation of dependency-set algorithm can rely on the garbage collection of the map-agreement module to get rid of redundant information associated with specific commands in its data structures, with the purpose of preventing the dependency sets to grow indefinitely. 
+%Any implementation of dependency-set algorithm can rely on the garbage collection of the map-agreement module to get rid of redundant information associated with specific commands in its data structures, with the purpose of preventing the dependency sets to grow indefinitely. 
  
-\todo{``Suggest'' can also be used to trigger recovery. Describe better this part.}
+%\todo{``Suggest'' can also be used to trigger recovery. Describe better this part.}
 %\todo{Write a suggestion on about GC of dependencies. Remove any command c such that a committed command depends on c. Also us the GC of the map-agreement component.}
 
 \subsection{Agreeing on Dependency Sets}\label{map-algo}
