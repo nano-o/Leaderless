@@ -201,7 +201,7 @@ Its key property is \cref{lemma:graph}.
 We assume that processes initially agree, for each set of commands $\mathcal{D}$, on a total order $<_{\mathcal{D}}$ on $\mathcal{D}$.
 In practice, if commands are attached a unique identifier among a totally ordered set, $<_{\mathcal{D}}$ can be the restriction of this total order to $\mathcal{D}$.
 
-We say that a command $c$ in the domain of $m_p$ is \emph{executable} when no command $c$ which is not in the domain of $m_p$ can be reached from $c$ by recursively following $c$'s dependencies.
+We say that a command $c$ in the domain of $m_p$ is \emph{executable} when no command $c'$ which is not in the domain of $m_p$ can be reached from $c$ by recursively following $c$'s dependencies.
 The local variable $m_p$ denotes a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the executable commands of $m_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ iff $c_2 \in m_p\left[ c_1 \right]$ (i.e., $c_1$ depends on $c_2$). For example, if $m_p = \left[ c_1 \mapsto \aset{c_2,c_4}, c_2 \mapsto \aset{c_3}, c_3 \mapsto \aset{c_2}\right]$ then $V\left( g_p \right) = \aset{c_2,c_3}$ and $E\left( g_p \right) = \aset{\left( c_2,c_3 \right),\left( c_3,c_2 \right)}$.
 
 A directed graph $g$ \emph{induces a partial order} $\preceq_g$ on its vertices defined such that $c_1 \preceq_g c_2$ iff there is a path from $c_2$ to $c_1$ and none from $c_1$ to $c_2$.
@@ -216,7 +216,7 @@ For example, consider the graphs $h'$ and $h''$ such that $V\left( h' \right)=\a
 \end{comment}
 
 Define graph intersection such that $V\left( g_1 \cap g_2 \right)=V\left( g_1 \right)\cap V\left( g_2 \right)$ and $E\left( g_1 \cap g_2 \right)= E\left( g_1 \right)\cap E\left( g_2 \right)$, and graph union such that $V\left( g_1 \cup g_2 \right)=V\left( g_1 \right)\cup V\left( g_2 \right)$ and $E\left( g_1 \cup g_2 \right)= E\left( g_1 \right)\cup E\left( g_2 \right)$.
-Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$ ($g$ is a vertex-induced subgraph of $g'$ iff $V\left( g \right)\subseteq V\left( g' \right)$ and if both endpoints of $e\in E\left( g' \right)$ are in $V\left( g \right)$, then $e\in E\left( g \right)$).
+Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$ ($g$ is a vertex-induced subgraph of $g'$ iff $V\left( g \right)\subseteq V\left( g' \right)$, and for every $e\in E\left( g' \right)$, if both endpoints of $e$ are in $V\left( g \right)$, then $e\in E\left( g \right)$).
 
 \begin{mylemma}\label{lemma:graph}
 Assume that $g_1$ and $g_2$ are two dependency graphs, 
