@@ -98,3 +98,10 @@
     \popQED\endtrivlist\@endpefalse
 }
 \makeatother
+
+\makeatletter
+\newcommand{\setword}[2]{%
+    \phantomsection
+    #1\def\@currentlabel{\unexpanded{#1}}\label{#2}%
+}
+\makeatother
