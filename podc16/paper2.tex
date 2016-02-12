@@ -176,16 +176,13 @@ Any implementation of dependency-set algorithm can rely on the garbage collectio
 \todo{``Suggest'' can also be used to trigger recovery. Describe better this part.}
 %\todo{Write a suggestion on about GC of dependencies. Remove any command c such that a committed command depends on c. Also us the GC of the map-agreement component.}
 
-\subsection{Agreeing on Dependency Sets}
-\label{map-algo}
-
+\subsection{Agreeing on Dependency Sets}\label{map-algo}
 A map-agreement algorithm exposes the input interface $\opn{propose}_p\left( c, \mathcal{D} \right)$, to propose a set of dependencies $\mathcal{D}$ for a command $c$, and the output interface $\opn{commit}_p\left( c, \mathcal{D} \right)$, to commit $\mathcal{D}$ for $c$, where $p\in P$ is the process executing the call.
 Moreover, a map-agreement algorithm must ensure that: 
 
 \begin{enumerate}[noitemsep,nolistsep]
-    \item For any decision $\opn{commit}_p\left( c, \mathcal{D} \right)$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
-    \item For any two decisions $\opn{commit}_p\left( c, \mathcal{D}_1 \right)$, $\opn{commit}_q\left( c, \mathcal{D}_2 \right)$ (with $p$ possibly equal to $q$), then $\mathcal{D}_1$ is equal to $\mathcal{D}_2$.
-
+    \item[-] For any decision $\opn{commit}_p\left( c, \mathcal{D} \right)$, then $\mathcal{D}$ has been proposed for $c$ at an earlier time.
+    \item[-] For any two decisions $\opn{commit}_p\left( c, \mathcal{D}_1 \right)$, $\opn{commit}_q\left( c, \mathcal{D}_2 \right)$, $\mathcal{D}_1$ is equal to $\mathcal{D}_2$.  
 
 \end{enumerate}
 
