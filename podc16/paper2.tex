@@ -195,7 +195,7 @@ An example of implementation of the map-agreement algorithm can be any state mac
 \subsection{Processing the Dependency Graph}
 \label{abstract-algo}
 
-The graph processing algorithm is executed locally by a node (line 10 of \cref{fig:deps-set-algo3}). It must compute the value of $\opn{c-struct}\left( g_p \right)$, as defined in \cref{lindef}.
+The graph processing algorithm is executed locally by a process (line 10 of \cref{fig:deps-set-algo3}). It must compute the value of $\opn{c-struct}\left( g_p \right)$, as defined in \cref{lindef}.
 Its key property is \cref{lemma:graph}. 
 We assume that processes initially agree, for each set of commands $\mathcal{D}$, on a total order $<_{\mathcal{D}}$ on $\mathcal{D}$.
 In practice, if commands are attached a unique identifier among a totally ordered set, $<_{\mathcal{D}}$ can be the restriction of this total order to $\mathcal{D}$.
@@ -214,8 +214,8 @@ We now define a partial order on graphs. If $g_1$ and $g_2$ are two graphs, then
 For example, consider the graphs $h'$ and $h''$ such that $V\left( h' \right)=\aset{c_1,c_2,c_4}$, $E\left( h' \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right)}$, $V\left( h'' \right)=\aset{c_1,c_3,c_4}$, and $E\left( h'' \right)=\aset{\left( c_1,c_3 \right)}$. We have that $h'\leq h$, but $ h''\not\leq h$.
 \end{comment}
 
-Define the intersection of two graphs such that $V\left( g_1 \cap g_2 \right)=V\left( g_1 \right)\cap V\left( g_2 \right)$ and $E\left( g_1 \cap g_2 \right)= E\left( g_1 \right)\cap E\left( g_2 \right)$, and define their union such that $V\left( g_1 \cup g_2 \right)=V\left( g_1 \right)\cup V\left( g_2 \right)$ and $E\left( g_1 \cup g_2 \right)= E\left( g_1 \right)\cup E\left( g_2 \right)$.
-Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$.
+Define graph intersection such that $V\left( g_1 \cap g_2 \right)=V\left( g_1 \right)\cap V\left( g_2 \right)$ and $E\left( g_1 \cap g_2 \right)= E\left( g_1 \right)\cap E\left( g_2 \right)$, and graph union such that $V\left( g_1 \cup g_2 \right)=V\left( g_1 \right)\cup V\left( g_2 \right)$ and $E\left( g_1 \cup g_2 \right)= E\left( g_1 \right)\cup E\left( g_2 \right)$.
+Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$ ($g$ is a vertex-induced subgraph of $g'$ iff $V\left( g \right)\subseteq V\left( g' \right)$ and if both endpoints of $e\in E\left( g' \right)$ are in $V\left( g \right)$, then $e\in E\left( g \right)$).
 
 \begin{mylemma}\label{lemma:graph}
 Assume that $g_1$ and $g_2$ are two dependency graphs, 
