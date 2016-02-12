@@ -285,7 +285,7 @@ If $m_p\subseteq m_q$
 \subsection{Obtaining EPaxos}
 
 \printbibliography%
-
+\begin{comment}
 \appendix
 
 \section{Generalized Consensus}
@@ -305,5 +305,5 @@ An example of implementation of such an algorithm is depicted by the pseudocode 
 
 The provided implementation satisfies the specification of a dependency-set algorithm for the following reasons. Since any command in a dependency-set that is suggested by a process (lines~\ref{alg:update-deps-p} and~\ref{alg:call-suggest}) must be in the set $cmds_q$ of the commands received by some process $q$ (line~\ref{alg:update-d}), and a process receives a command iff there exists some process that previously announced the command (line~\ref{alg:send-new-cmd}), then it follows that any command in any suggested dependency-set has been previously announced. Further, since a process can suggest a set of dependencies $deps_p[c]$ for a command $c$ after it has received a reply for $c$ from at least a quorum of processes (lines~\ref{alg:receive-deps}--\ref{alg:call-suggest}), we have that $\opn{suggest}_p \left( c,deps_p[c]\right)$ is called only if a quorum of processes $q$ have $c$ in their $cmds_q$ (line~\ref{alg:update-cmds-p}). Therefore, by the requirement that we enforced on the quorums, we can conclude that for any two suggestions $\opn{suggest}_p \left( c_1,deps_p[c_1]\right)$ and $\opn{suggest}_q \left( c_2,deps_q[c_2]\right)$,  if $c_1$ and $c_2$ do not commute then either $c_1\in deps_q[c_2]$ or $c_2 \in deps_p[c_1]$.
 
-
+\end{comment}
 \end{document}
