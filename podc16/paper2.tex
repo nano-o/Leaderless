@@ -225,24 +225,23 @@ Local variables: $m_p$, a map from commands to dependency sets, initially the em
 
 \end{comment}
 
-The graph processing algorithm is executed locally by a node (line 10 of \cref{fig:deps-set-algo3}). It must compute the value of $\opn{c-struct}\left( g_p \right)$, as defined below.
-Its main property is Lemma 1, which with the properties of the sub-algorithms imply safety and liveness. 
+The graph processing algorithm is executed locally by a node (line 10 of \cref{fig:deps-set-algo3}). It must compute the value of $\opn{c-struct}\left( g_p \right)$, as defined in \cref{lindef}.
+Its key property is \cref{lemma1}. 
 We assume that processes initially agree, for each set of commands $cs$, on a total order $<_{cs}$ on $cs$.
 In practice, if commands are attached a unique identifier among a totally ordered set, $<_{cs}$ can be the restriction of this total order on $cs$.
 
 %\textbf{Local dependency graph computed by a process.} 
-The local variable $cs_p$ of a process $p$ can be seen as describing a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the domain of $m_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ if and only both $c_1$ and $c_2$ are in $V\left( g_p \right)$ and $c_2 \in m_p\left[ c_1 \right]$ (i.e., $c_1$ depends on $c_2$). For example, if $cs_p = \left[ c_1 \mapsto \aset{c_2,c_3}, c_2 \mapsto \aset{c_1} \right]$ then $V\left(
-g_p \right) = \aset{c_1,c_2}$ and $E\left( g_p \right) = \aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right)}$.
-\todo{This is not accurate, see the TLA spec.}
+We say that a command $c$ in the domain of $m_p$ is \emph{complete} when no command $c$ which is not in the domain of $m_p$ can be reached from $c$ by recursively following $c$'s dependencies.
+The local variable $m_p$ denotes a directed graph $g_p$ whose set of vertices $V\left( g_p \right)$ is the complete commands of $m_p$ and whose edges $E\left( g_p \right)$ are such that there is an edge from $c_1$ to $c_2$ iff $c_2 \in m_p\left[ c_1 \right]$ (i.e., $c_1$ depends on $c_2$). For example, if $m_p = \left[ c_1 \mapsto \aset{c_2,c_4}, c_2 \mapsto \aset{c_3}, c_3 \mapsto \aset{c_2}\right]$ then $V\left( g_p \right) = \aset{c_2,c_3}$ and $E\left( g_p \right) = \aset{\left( c_2,c_3 \right),\left( c_3,c_2 \right)}$.
 
 %\textbf{Orders induced by a graph.}
-A directed graph $g$ \emph{induces a partial order} $\preceq_g$ on its vertices defined such that $c_1 \preceq_g c_2$ iff there is a path from $c_1$ to $c_2$ and there is no path from $c_2$ to $c_1$.
+A directed graph $g$ \emph{induces a partial order} $\preceq_g$ on its vertices defined such that $c_1 \preceq_g c_2$ iff there is a path from $c_1$ to $c_2$ and none from $c_2$ to $c_1$.
 %Let $\opn{TOs}\left( g \right)$ be the set of total orders $o$ such that $\preceq_g \subseteq o$.
-For example, consider $h$ such that $V\left( h \right)=\aset{c_1,c_2,c_3,c_4}$ and $E\left( h \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right),\left( c_1,c_3 \right)}$. 
+For example, consider $h$ where $V\left( h \right)=\aset{c_1,c_2,c_3,c_4}$ and $E\left( h \right)=\aset{\left( c_1,c_2 \right),\left( c_2,c_1 \right),\left( c_1,c_3 \right)}$. 
 We have that $\preceq_h = \aset{\left( c_1,c_3 \right)}$.
 %If $c\in V\left( g \right)$, we write $\left[ c \right]_g$ for the strongly connected component of $g$ to which $c$ belongs. 
 %\textbf{Linearizations of a dependency graph.}
-We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every pair of vertices $c_1,c_2\in V\left( g \right)$, $c_1 \preceq_g c_2$ implies $c_1 \ll c_2$, and if $c_1$ and $c_2$ belong to the same strongly connected component $cs$ and $ c_1 <_{cs} c_2$ hold, then $c_1 \ll c_2$. For example, assuming that $c_2 \leq_{\aset{c_1,c_2}} c_1$, the linearizations of $h$ are $\aseq{c_2,c_1,c_3,c_4}$, $\aseq{c_2,c_1,c_4,c_3}$, $\aseq{c_2,c_4,c_1,c_3}$, and $\aseq{c_4,c_2,c_1,c_3}$.
+We say that a total order $\ll$ on $V\left( g \right)$ is a \emph{linearization} of $g$ when for every $c_1,c_2\in V\left( g \right)$, $c_1 \preceq_g c_2$ implies $c_1 \ll c_2$, and if $c_1$ and $c_2$ belong to the same strongly connected component $cs$ and $ c_1 <_{cs} c_2$ hold, then $c_1 \ll c_2$. For example, assuming that $c_2 \leq_{\aset{c_1,c_2}} c_1$, the linearizations of $h$ are $\aseq{c_2,c_1,c_3,c_4}$, $\aseq{c_2,c_1,c_4,c_3}$, $\aseq{c_2,c_4,c_1,c_3}$, and $\aseq{c_4,c_2,c_1,c_3}$.
 %\textbf{Partial order on graphs.}
 
 \begin{comment}
@@ -253,16 +252,18 @@ For example, consider the graphs $h'$ and $h''$ such that $V\left( h' \right)=\a
 Define the intersection of two graphs such that $V\left( g_1 \cap g_2 \right)=V\left( g_1 \right)\cap V\left( g_2 \right)$ and $E\left( g_1 \cap g_2 \right)= E\left( g_1 \right)\cap E\left( g_2 \right)$, and define their union such that $V\left( g_1 \cup g_2 \right)=V\left( g_1 \right)\cup V\left( g_2 \right)$ and $E\left( g_1 \cup g_2 \right)= E\left( g_1 \right)\cup E\left( g_2 \right)$.
 Define two graphs $g_1$ and $g_2$ as being \emph{compatible} iff $g_1 \cap g_2$ is a vertex-induced subgraph of $g_1 \cup g_2$.
 
-\textbf{Lemma 1}
+\begin{mylemma}\label{lemma1}
 Assume that $g_1$ and $g_2$ are two dependency graphs, 
 that for every pair of non-commutative commands $c_1,c_2 \in V\left(g_2\right)$, either $\left( c_1,c_2 \right)\in E\left( g_2 \right)$ or $\left( c_2,c_1 \right)\in E\left( g_2 \right)$,
 that $g_1$ and $g_2$ are compatible,
 that $l_1$ is a linearization of $g_1$, and that $l_2$ is a linearization of $g_2$. 
 Then we have (a), $\bot\bullet l_1$ and $\bot\bullet l_2$ are compatible c-structs, and (b), if $g_1 = g_2$ then $\bot\bullet l_1 = \bot\bullet l_2$.
+\end{mylemma}
 
-\textbf{Definition 1}
+\begin{mydef}\label{lindef}
 We define $\opn{c-struct}\left( m_p \right) = \bot\bullet l$ where $l$ is a linearization of $g_p$.
 By lemma 1.b, $\opn{c-struct}\left( m_p \right)$ is well-defined.
+\end{mydef}
 
 
 \begin{comment}
