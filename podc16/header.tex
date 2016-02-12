@@ -76,3 +76,9 @@
 \crefname{mylemma}{lemma}{lemmas}
 \newtheorem{mydef}{Definition}
 \crefname{mydef}{definition}{definitions}
+
+\makeatletter
+\def\thm@space@setup{%
+    \thm@preskip=\parskip \thm@postskip=0pt
+}
+\makeatother
