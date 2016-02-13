@@ -56,7 +56,7 @@ We show that the core idea underlying EPaxos can be captured in a generic leader
 Our generic algorithm gives rise to a family of algorithms whose members are obtained by using a concrete map-agreement algorithm and a concrete dependency-set algorithm. 
 %Note that any generalized consensus algorithm can be used to implement (2), but only a weaker problem than generalized consensus needs to be solved because no ordering among proposal is required.
 
-On top of enabling modular correctness proofs of algorithms like EPaxos, we expect that the modular structure of our generic leaderless algorithm will allow a principled theoretical and empirical evaluation of the trade-offs that can be achieved by different implementations of our two abstractions in varied environments such clusters or wide area networks, and on varied metrics such as agreement latency, impact of failures or conflicts, tolerance to slow processes, load
+On top of enabling modular correctness proofs of algorithms like EPaxos, we expect that the modular structure of our generic leaderless algorithm will allow a principled theoretical and empirical evaluation of the trade-offs that can be achieved by different implementations of our two abstractions in varied environments such as clusters or wide area networks, and on varied metrics such as agreement latency, impact of failures or conflicts, tolerance to slow processes, load
 balancing, size of quorums, etc.
 We have formalized\footnote{\url{http://losa.fr/leaderless}} and model-checked our generic leaderless algorithm with the TLA$^+$ toolbox.
 
