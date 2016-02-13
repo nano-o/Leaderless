@@ -62,13 +62,13 @@ We have formalized\footnote{\url{http://losa.fr/leaderless}} and model-checked o
 
 \section{Leaderless Generalized Consensus Algorithms}
 
-We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}, in which each process receives proposals for commands of the form $\opn{GC-Propose}(c)$, and must produce responses of the form $\opn{GC-Decide}(\sigma)$, where $\sigma$ is a c-struct, and the sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties of generalized consensus.
+We consider a set of processes $P$ subject to crash-stop faults and communicating by message-passing in an asynchronous network. Processes in $P$ must solve the Generalized Consensus problem~\cite{Lamport05GeneralizeConsensus}, in which each process receives proposals for commands of the form $\opn{GC-Propose}(c)$, must produce responses of the form $\opn{GC-Decide}(\sigma)$, where $\sigma$ is a c-struct, and the sequence of calls observed must satisfy the non-triviality, consistency, stability, and liveness properties of generalized consensus.
 Briefly, the c-structs are a set, including $\bot$, with an operator $\bullet$ for appending commands to a c-struct. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands.
-We say that two commands when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$.
+We say that two commands \emph{commute} when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$.
 C-structs are partially ordered: $\sigma_1\sqsubseteq \sigma_2$ iff there exists a sequence of commands $s$ such that $\sigma_2 = \sigma_1\bullet s$. Moreover, $\bot\sqsubseteq \sigma$ for any
 $\sigma$. Two c-structs are compatible when they have a
 common upper bound. A c-struct contains a command $c$ when it is of the form $\bot\bullet cs$ where $c$ appears in the sequence of commands $cs$. The consistency property of generalized consensus requires that any two decided c-structs be compatible.
-We use the same notation as and refer the reader to~\cite{Lamport05GeneralizeConsensus} for a thourough discussion of c-structs and generalized consensus. 
+We refer the reader to~\cite{Lamport05GeneralizeConsensus} for a thourough discussion of c-structs and generalized consensus, and we use the same notation.
 
 Our leaderless generalized consensus algorithm orchestrates a dependency-set algorithm and map-agreement algorithm as shown in \cref{fig:deps-set-algo3}.
 A process $p$ maintains two local variables $m_p$, a map from commands to sets of commands, and $\sigma_p$, a c-struct . Upon  receiving a command $c$, $p$ proceeds in three phases. First, it calls a \textit{dependency-set} algorithm (\Cref{dep-algo}) to determine a set of commands $\mathcal{D}$ that the command $c$ may depend on. Second, $p$ proposes the mapping  $c\mapsto \mathcal{D}$ to a \textit{map-agreement} algorithm (\Cref{map-algo}); when the map-agreement algorithm
