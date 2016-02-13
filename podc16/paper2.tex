@@ -52,7 +52,7 @@ Therefore, recently proposed agreement algorithms like Mencius~\cite{MaoJunqueir
 Mencius rotates the leader among the processes but its structure remains close to MultiPaxos. 
 However, EPaxos and Alvin are based on a novel algorithmic idea first introduced in EPaxos.
 
-We show that the core idea underlying EPaxos can be captured in a generic leaderless generalized consensus algorithm that uses two new abstractions: a \textit{dependency-set algorithm}, which suggests dependencies for commands, and a \textit{map-agreement algorithm}, which ensures that, for each submitted command, processes agree on a dependency set. Both abstractions lend themselves well to implementations that avoid the use of a unique leader process.
+We show that the core idea underlying EPaxos can be captured in a \emph{generic leaderless generalized consensus algorithm} that uses two new abstractions: a \textit{dependency-set algorithm}, which suggests dependencies for commands, and a \textit{map-agreement algorithm}, which ensures that, for each submitted command, processes agree on a dependency set. Both abstractions lend themselves well to implementations that avoid the use of a unique leader process.
 Our generic algorithm gives rise to a family of algorithms whose members are obtained by using a concrete map-agreement algorithm and a concrete dependency-set algorithm. 
 %Note that any generalized consensus algorithm can be used to implement (2), but only a weaker problem than generalized consensus needs to be solved because no ordering among proposal is required.
 
