@@ -53,7 +53,7 @@ Mencius rotates the leader among the processes but its structure remains close t
 However, EPaxos and Alvin are based on a novel algorithmic idea first introduced in EPaxos.
 
 We show that the core idea underlying EPaxos can be captured in a generic algorithm that uses two abstractions: a dependency-set algorithm, which suggests dependencies for commands, and a map-agreement algorithm, which ensures that, for each submitted command, processes agree on a dependency set. Both abstractions lend themselves well to implementations that avoid the use of a unique leader process.
-Our generic algorithm gives rise to a family of algorithms whose members are obtained by using a concrete agreement algorithm and a concrete dependency-set algorithm. 
+Our generic algorithm gives rise to a family of algorithms whose members are obtained by using a concrete map-agreement algorithm and a concrete dependency-set algorithm. 
 %Note that any generalized consensus algorithm can be used to implement (2), but only a weaker problem than generalized consensus needs to be solved because no ordering among proposal is required.
 
 On top of enabling modular correctness proofs of algorithms like EPaxos, we expect that the modular structure of our generic leaderless algorithm will allow a principled theoretical and empirical evaluation of the trade-offs that can be achieved by different implementations of our two abstractions, as well as optimizations to their orchestration.
@@ -253,7 +253,7 @@ By lemma 1(b), $\opn{c-struct}\left( m_p \right)$ is well-defined.
 %From (b) it follows that if $c$ is in the domain of both $m_p$ and $m_q$ then $m_p\left[ c \right] = m_q\left[ c \right]$.
 %\end{proof*}
 
-\noindent\textbf{Lemma 2.} \emph{If $g_p^1$ is the graph $g_p$ at time $t_1$, $g_q^2$ is the graph $g_q$ at time $t_2$, then $g_p^1$ and $g_q^2$ are compatible. }
+\noindent\textbf{Lemma 2.} \emph{If $g_p^1$ is the graph $g_p$ at some point in an execution, $g_q^2$ is the graph $g_q$ at another point, then $g_p^1$ and $g_q^2$ are compatible. }
 
 Lemma 2 follows from property \ref{commit-agreement} of the map-agreement algorithm and from the definition of $g_p$.
 
