@@ -1,6 +1,11 @@
 ------------------------- MODULE ModularLeaderless -------------------------
 
-EXTENDS GraphProcessing, Common
+EXTENDS GraphProcessing2, Common
+
+(***************************************************************************)
+(* A interference relation.                                                *)
+(***************************************************************************)
+CONSTANT R 
 
 VARIABLE 
     conss, \* An array of states of consensus instances
@@ -27,21 +32,21 @@ Init ==
     /\ conss = [v \in V |-> ConsInterf!Init]
     /\ proposed = <<>>
     /\ committed = <<>>
-    /\ linearizations = <<>>
+    /\ linearizations = {}
 
 (***************************************************************************)
 (* Propose dependencies deps for v.                                        *)
 (*                                                                         *)
-(* We ensure the following invariant: for any two values v1 and v2         *)
-(* proposed with deps1 and deps2, either v1 is in deps2 or vice versa.     *)
+(* We ensure the following invariant: for any two interfering values v1    *)
+(* and v2 proposed with deps1 and deps2, either v1 is in deps2 or vice     *)
+(* versa.                                                                  *)
 (***************************************************************************)
 Propose(v, deps) ==
     /\  v \notin deps
     /\ \E s \in ConsInterf!State : 
         /\ ConsInterf!Propose(deps, conss[v], s)
         /\ conss' = [conss EXCEPT ![v] = s]
-    \* /\ ConsInterf!Propose(deps, conss[v], conss'[v])
-    /\ \A v2 \in DOMAIN proposed : v2 # v => 
+    /\ \A v2 \in DOMAIN proposed : v2 # v /\ <<v2,v>> \in R => 
             \A deps2 \in proposed[v2] : v \in deps2 \/ v2 \in deps  
     /\ proposed' = [v2 \in DOMAIN proposed \cup {v} |-> 
         IF v2 = v THEN 
@@ -62,18 +67,8 @@ TheDeps(v) == CHOOSE deps \in committed[v] : TRUE
 (***************************************************************************)
 Graph(committed_) == [v \in DOMAIN committed_ |-> TheDeps(v)]
 
-(***************************************************************************)
-(* Executing all executable values.  ExecuteAll is a function from         *)
-(* executable values to their execution history.                           *)
-(***************************************************************************)
-ExecuteAll ==
-    LET executable == {v \in DOMAIN committed : CanExec(v, Graph(committed))}
-    IN [v \in executable |-> LinearizeDeps(SubGraph(v, Graph(committed)), lf)]
+f == CHOOSE f \in LinFunsRec(SUBSET V) : TRUE
 
-ExecuteAllBroken ==
-    LET executable == DOMAIN committed
-    IN [v \in executable |-> LinearizeDeps(SubGraph(v, Graph(committed)), lf)]
-    
 Decide(v, deps) ==
     /\ \E s \in ConsInterf!State :
         /\  ConsInterf!Decide(deps, conss[v], s)
@@ -83,14 +78,8 @@ Decide(v, deps) ==
             THEN committed[v2] \cup {deps}
             ELSE {deps}
         ELSE committed[v2]] 
-    /\  LET executed == (ExecuteAll')
-        IN  linearizations' = [v2 \in (DOMAIN linearizations) \cup (DOMAIN executed) |-> 
-                IF v2 \in DOMAIN executed
-                THEN
-                    IF v2 \in DOMAIN linearizations 
-                    THEN linearizations[v2] \cup {executed[v2]}
-                    ELSE {executed[v2]}
-                ELSE linearizations[v2]]
+    /\  LET newLin == CHOOSE l \in LinsOfGraph(ConvertMap(Graph(committed)),f) : TRUE
+        IN  linearizations' = linearizations \cup {newLin}
     /\ UNCHANGED proposed
 
 Cons(state) == INSTANCE Consensus WITH V <- Deps
@@ -115,20 +104,14 @@ AtMostOnce == \A v \in DOMAIN committed : Cardinality(committed[v]) = 1
 THEOREM Spec => []AtMostOnce
 
 (***************************************************************************)
-(* Properties of linearizations.                                           *)
+(* The consistency property of generalized consensus.                      *)
 (***************************************************************************)
-LinearizationsCard1 ==
-    \A v \in DOMAIN linearizations : Cardinality(linearizations[v]) = 1
-LinearizationsPrefix ==
-    \A v1,v2 \in DOMAIN linearizations : 
-        LET TheLin(v) == CHOOSE l \in linearizations[v] : TRUE
-            l1 == TheLin(v1)
-            l2 == TheLin(v2)
-        IN  Prefix(l1,l2) \/ Prefix(l2,l1)
+Consistency == \A l1,l2 \in linearizations : l1 # l2 =>
+    CStruct(R)!IsCompatible({EqClass(l1,R),EqClass(l2,R)})
         
-THEOREM Spec => [](LinearizationsCard1 /\ LinearizationsPrefix)
+THEOREM Spec => []Consistency
 
 =============================================================================
 \* Modification History
-\* Last modified Tue Feb 09 13:59:21 EST 2016 by nano
+\* Last modified Sat Feb 13 18:54:52 EST 2016 by nano
 \* Created Thu Feb 04 12:27:45 EST 2016 by nano
