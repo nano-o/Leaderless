@@ -39,6 +39,12 @@ binoy@vt.edu
 
 \begin{document}
 
+\CopyrightYear{2016}
+\setcopyright{rightsretained}
+\conferenceinfo{PODC'16}{July 25-28, 2016, Chicago, IL, USA}
+\isbn{978-1-4503-3964-3/16/07}
+\doi{http://dx.doi.org/10.1145/2933057.2933072}
+
 \maketitle
 
 %\input{cover}
@@ -48,8 +54,8 @@ binoy@vt.edu
 
 Most agreement algorithms inspired by Paxos and MultiPaxos~\cite{lamport2001paxos} rely on the existence of a unique leader process which enforces an ordering on commands during fault-free periods.
 In practice, the unique leader can easily become a performance bottleneck for the system.
-Therefore, recently proposed agreement algorithms like Mencius~\cite{MaoJunqueiraMarzullo08MenciusBuildingEfficientReplicatedStateMachine}, EPaxos~\cite{MoraruAndersenKaminsky13ThereIsMoreConsensusEgalitarianParliaments}, or Alvin~\cite{TurcuETAL14BeGeneralDontGiveUpConsistency} strive to increase performance by avoiding the use of a unique leader.
-Mencius rotates the leader among the processes but its structure remains close to MultiPaxos. 
+Therefore, recently proposed agreement algorithms like S-Paxos~\cite{BielyETAL12SpaxosOffloadingLeaderHighThroughputState}, Mencius~\cite{MaoJunqueiraMarzullo08MenciusBuildingEfficientReplicatedStateMachine}, EPaxos~\cite{MoraruAndersenKaminsky13ThereIsMoreConsensusEgalitarianParliaments}, or Alvin~\cite{TurcuETAL14BeGeneralDontGiveUpConsistency} strive to increase performance by avoiding the use of a unique leader.
+S-Paxos offloads the computation that the leader has to perform to other replicas, while Mencius rotates the leader among the processes; the structure of both algorithms remains close to MultiPaxos. 
 However, EPaxos and Alvin are based on a novel algorithmic idea first introduced in EPaxos.
 
 We show that the core idea underlying EPaxos can be captured in a \emph{generic leaderless generalized consensus algorithm} that uses two new abstractions: a \textit{dependency-set algorithm}, which suggests dependencies for commands, and a \textit{map-agreement algorithm}, which ensures that, for each submitted command, processes agree on a dependency set. Both abstractions lend themselves well to implementations that avoid the use of a unique leader process.
@@ -58,7 +64,7 @@ Our generic algorithm gives rise to a family of algorithms whose members are obt
 
 On top of enabling modular correctness proofs of algorithms like EPaxos, we expect that the modular structure of our generic leaderless algorithm will allow a principled theoretical and empirical evaluation of the trade-offs that can be achieved by different implementations of our two abstractions in varied environments such as clusters or wide area networks, and on varied metrics such as agreement latency, impact of failures or conflicts, tolerance to slow processes, load
 balancing, size of quorums, etc.
-We have formalized\footnote{\url{http://losa.fr/leaderless}} and model-checked our generic leaderless algorithm with the TLA$^+$ toolbox.
+We have formalized\footnote{\url{http://losa.fr/leaderless}} and model-checked our generic leaderless algorithm using the TLA$^+$ toolbox.
 
 \section{Leaderless Generalized Consensus Algorithms}
 
@@ -66,9 +72,13 @@ We consider a set of processes $P$ which are subject to crash-stop faults and wh
 Briefly, the c-structs are a set, including $\bot$, with an operator $\bullet$ for appending commands to a c-struct. Intuitively, a c-struct represents a set of sequences that are all equivalent up to the ordering of commutative commands.
 We say that two commands \emph{commute} when $\sigma\bullet c_1\bullet c_2 =  \sigma\bullet c_2\bullet c_1 $, for every c-struct $\sigma$.
 C-structs are partially ordered: $\sigma_1\sqsubseteq \sigma_2$ if and only if there exists a sequence of commands $s$ such that $\sigma_2 = \sigma_1\bullet s$. Moreover, $\bot\sqsubseteq \sigma$ for any
-$\sigma$. Two c-structs are compatible when they have a
-common upper bound \todo{that is constructible from \ldots}. A c-struct contains a command $c$ when it is of the form $\bot\bullet cs$ where $c$ appears in the sequence of commands $cs$. The consistency property of generalized consensus requires that any two decided c-structs be compatible.
+$\sigma$. 
+A c-struct contains a command $c$ when it is of the form $\bot\bullet cs$ where $c$ appears in the sequence of commands $cs$. 
+Two c-structs are compatible when they have a common upper bound that is constructible from the commands contained in the two c-structs. 
+The non-triviality property of generalized consensus requires that any decided c-struct be of the form $\bot\bullet \mathcal{D}$, where $\mathcal{D}$ is a sequence of proposed commands; consistency requires than any two decided c-structs $\sigma_1$ and $\sigma_2$ be compatible; stability requires that when a process $p$ decides a c-struct $\sigma_1$ and time $t_1$ and $\sigma_2$ at time $t_2$, then $t_1 \leq t_2$ implies that $\sigma_1\sqsubseteq \sigma_2$; finally, liveness requires that
+if a command keeps beeing proposed, then a c-struct $\sigma$ containing the command is eventually decided.
 We refer the reader to~\cite{Lamport05GeneralizeConsensus} for a thourough discussion of c-structs and generalized consensus, and we use the same notation.
+
 
 Our leaderless generalized consensus algorithm orchestrates a dependency-set algorithm and map-agreement algorithm as shown in \cref{fig:deps-set-algo3}.
 A process $p$ maintains two local variables $m_p$, a map from commands to sets of commands, and $\sigma_p$, a c-struct . Upon  receiving a command $c$, $p$ proceeds in three phases. First, it calls a \textit{dependency-set} algorithm (\Cref{dep-algo}) to determine a set of commands $\mathcal{D}$ on which the command $c$ may depend. Second, $p$ proposes the mapping  $c\mapsto \mathcal{D}$ to a \textit{map-agreement} algorithm (\Cref{map-algo}); when the map-agreement algorithm
